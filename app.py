@@ -9,12 +9,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & Smooth UI Styling
+# 2. Creamy Aesthetic & High-Contrast Typography Styling
 st.markdown("""
     <style>
     .stApp {
         background-color: #FAF7F2;
-        color: #3C3431;
+        color: #1A1614;
         font-family: 'Inter', -apple-system, sans-serif;
     }
     section[data-testid="stSidebar"] {
@@ -29,18 +29,19 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
     }
     h1, h2, h3, h4 {
-        color: #2E2724 !important;
-        font-weight: 600;
+        color: #1A1614 !important;
+        font-weight: 700;
     }
     [data-testid="stMetricLabel"] {
-        color: #7A6F68 !important;
+        color: #594D47 !important;
         font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        font-weight: 600;
     }
     [data-testid="stMetricValue"] {
-        color: #2E2724 !important;
-        font-weight: 700;
+        color: #1A1614 !important;
+        font-weight: 800;
     }
     .hero-container {
         background-color: #F2ECE4;
@@ -51,14 +52,14 @@ st.markdown("""
     }
     .hero-title {
         font-size: 1.6rem;
-        font-weight: 700;
-        color: #2E2724;
+        font-weight: 800;
+        color: #1A1614;
         margin-bottom: 10px;
     }
     .hero-text {
         font-size: 1.05rem;
         line-height: 1.6;
-        color: #5A4E47;
+        color: #3C3431;
         margin: 0;
     }
     .insight-card {
@@ -71,12 +72,12 @@ st.markdown("""
     }
     .insight-title {
         font-weight: 700;
-        color: #2E2724;
+        color: #1A1614;
         font-size: 1.1rem;
         margin-bottom: 8px;
     }
     .insight-desc {
-        color: #6B5E55;
+        color: #3C3431;
         font-size: 0.95rem;
         line-height: 1.5;
         margin: 0;
@@ -89,11 +90,12 @@ st.markdown("""
         background-color: #F2ECE4;
         border-radius: 8px;
         padding: 10px 20px;
-        color: #5A4E47;
+        color: #3C3431;
         border: 1px solid #E5DCD3;
+        font-weight: 600;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #2E2724 !important;
+        background-color: #1A1614 !important;
         color: #FAF7F2 !important;
     }
     </style>
@@ -172,7 +174,7 @@ with tab1:
         y="admit_rate",
         size="applicants",
         color="frpm_pct_100",
-        color_continuous_scale=["#C8B89A", "#8C6D53", "#4A3B32"],
+        color_continuous_scale=["#C8B89A", "#8C6D53", "#2C221E"],
         hover_name="school_name" if "school_name" in filtered.columns else None,
         hover_data=["applicants", "admits"],
         labels={
@@ -181,18 +183,28 @@ with tab1:
             "applicants": "Applicant Volume"
         },
         trendline="ols",
-        trendline_color_override="#2E2724"
+        trendline_color_override="#1A1614"
     )
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#F2ECE4",
-        font=dict(color="#3C3431", family="Inter"),
+        font=dict(color="#1A1614", family="Inter", size=12),
         coloraxis_showscale=False,
         height=520,
         margin=dict(t=20, b=20, l=20, r=20),
-        xaxis=dict(showgrid=True, gridcolor="#E5DCD3"),
-        yaxis=dict(showgrid=True, gridcolor="#E5DCD3")
+        xaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            title_font=dict(size=14, color="#1A1614", family="Inter"),
+            tickfont=dict(size=12, color="#1A1614", family="Inter")
+        ),
+        yaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            title_font=dict(size=14, color="#1A1614", family="Inter"),
+            tickfont=dict(size=12, color="#1A1614", family="Inter")
+        )
     )
     fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
     st.plotly_chart(fig, use_container_width=True)
@@ -249,9 +261,19 @@ with tab3:
     fig_hist.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#F2ECE4",
-        font=dict(color="#3C3431", family="Inter"),
+        font=dict(color="#1A1614", family="Inter", size=12),
         height=400,
-        xaxis=dict(showgrid=True, gridcolor="#E5DCD3"),
-        yaxis=dict(showgrid=True, gridcolor="#E5DCD3")
+        xaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            title_font=dict(size=14, color="#1A1614", family="Inter"),
+            tickfont=dict(size=12, color="#1A1614", family="Inter")
+        ),
+        yaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            title_font=dict(size=14, color="#1A1614", family="Inter"),
+            tickfont=dict(size=12, color="#1A1614", family="Inter")
+        )
     )
     st.plotly_chart(fig_hist, use_container_width=True)
