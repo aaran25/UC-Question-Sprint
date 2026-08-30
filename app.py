@@ -263,7 +263,7 @@ else:
                 <p style="color: #38BDF8; font-size: 1.2rem; font-weight: 900; margin-top: 0;">{"< 0.001" if p_val < 0.001 else f"{p_val:.3f}"}</p>
                 
                 <p style="color: #94A3B8; font-size: 0.75rem; line-height: 1.3; margin-top: 6px;">
-                    {f"Proves a positive relationship between school poverty concentration and admission rate (r = {r_val:.3f})." if r_val > 0 else f"Proves a rigorous inverse relationship between school poverty concentration and admission rate (r = {r_val:.3f})."}
+                    {f"Proves a positive relationship" if r_val > 0 else f"Proves a negative relationship"}
                 </p>
             </div>
             """, unsafe_allow_html=True)
