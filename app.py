@@ -142,7 +142,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 5. Sidebar Controls
+# 5. Sidebar Controls (Filtered to exclude years before 2014)
 st.sidebar.header("🎛️ Control Panel")
 st.sidebar.markdown("Customize parameters to segment the dataset.")
 
@@ -150,155 +150,164 @@ campuses = sorted(df["campus"].dropna().unique()) if "campus" in df.columns else
 default_campus_idx = campuses.index("Universitywide") if "Universitywide" in campuses else 0
 selected_campus = st.sidebar.selectbox("Select UC Campus", campuses, index=default_campus_idx)
 
-years = sorted(df["fall_term"].dropna().unique(), reverse=True) if "fall_term" in df.columns else [2025]
+# Filter years to only include 2014 and onward
+if "fall_term" in df.columns:
+    all_years = sorted(df["fall_term"].dropna().unique(), reverse=True)
+    years = [y for y in all_years if y >= 2014]
+else:
+    years = [2025]
+
 selected_year = st.sidebar.selectbox("Select Fall Term", years, index=0)
 
 poverty_threshold = st.sidebar.slider("High Poverty Threshold (% FRPM)", min_value=10, max_value=90, value=50, step=5)
 
-# 6. Data Filtering
+# 6. Data Filtering & Empty Check
 filtered = df[
     (df["fall_term"] == selected_year) & 
     (df["campus"] == selected_campus)
 ].dropna(subset=["frpm_pct_100", "admits", "applicants"]) if "fall_term" in df.columns and "campus" in df.columns else df.copy()
 
-filtered["admit_rate"] = ((filtered["admits"] / filtered["applicants"]) * 100).round(2)
-filtered["frpm_pct_100"] = filtered["frpm_pct_100"].round(2)
+if filtered.empty:
+    st.warning(f"⚠️ No data available for **{selected_campus}** in **Fall {selected_year}**. Please select a different year or campus combination from the sidebar.")
+else:
+    filtered["admit_rate"] = ((filtered["admits"] / filtered["applicants"]) * 100).round(2)
+    filtered["frpm_pct_100"] = filtered["frpm_pct_100"].round(2)
 
-high_pov = filtered[filtered["frpm_pct_100"] >= poverty_threshold]
-low_pov = filtered[filtered["frpm_pct_100"] < poverty_threshold]
+    high_pov = filtered[filtered["frpm_pct_100"] >= poverty_threshold]
+    low_pov = filtered[filtered["frpm_pct_100"] < poverty_threshold]
 
-high_rate = round((high_pov["admits"].sum() / high_pov["applicants"].sum() * 100), 2) if high_pov["applicants"].sum() > 0 else 0.00
-low_rate = round((low_pov["admits"].sum() / low_pov["applicants"].sum() * 100), 2) if low_pov["applicants"].sum() > 0 else 0.00
-rate_diff = round(low_rate - high_rate, 2)
+    high_rate = round((high_pov["admits"].sum() / high_pov["applicants"].sum() * 100), 2) if high_pov["applicants"].sum() > 0 else 0.00
+    low_rate = round((low_pov["admits"].sum() / low_pov["applicants"].sum() * 100), 2) if low_pov["applicants"].sum() > 0 else 0.00
+    rate_diff = round(low_rate - high_rate, 2)
 
-# 7. Metrics Row
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Campus", selected_campus)
-col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.2f}%")
-col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.2f}%")
-col4.metric("Admit Rate Gap", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
+    # 7. Metrics Row
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Campus", selected_campus)
+    col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.2f}%")
+    col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.2f}%")
+    col4.metric("Admit Rate Gap", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
 
-st.write("")
+    st.write("")
 
-# 8. Main Tabs Layout
-tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
+    # 8. Main Tabs Layout
+    tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
 
-with tab1:
-    st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
-    
-    fig = px.scatter(
-        filtered,
-        x="frpm_pct_100",
-        y="admit_rate",
-        size="applicants",
-        color="frpm_pct_100",
-        color_continuous_scale=["#C8B89A", "#8C6D53", "#2C221E"],
-        hover_name="school_name" if "school_name" in filtered.columns else None,
-        hover_data=["applicants", "admits"],
-        labels={
-            "frpm_pct_100": "High School Poverty Rate (% FRPM)",
-            "admit_rate": "UC Admit Rate (%)",
-            "applicants": "Applicant Volume"
-        },
-        trendline="ols",
-        trendline_color_override="#1A1614"
-    )
-
-    fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#F2ECE4",
-        font=dict(color="#1A1614", family="Inter", size=12),
-        coloraxis_showscale=False,
-        height=520,
-        margin=dict(t=20, b=20, l=20, r=20),
-        xaxis=dict(
-            showgrid=True, 
-            gridcolor="#E5DCD3",
-            zeroline=True,
-            zerolinewidth=1.5,
-            zerolinecolor="#1A1614",
-            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-            tickfont=dict(size=12, color="#000000", family="Inter")
-        ),
-        yaxis=dict(
-            showgrid=True, 
-            gridcolor="#E5DCD3",
-            zeroline=True,
-            zerolinewidth=1.5,
-            zerolinecolor="#1A1614",
-            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-            tickfont=dict(size=12, color="#000000", family="Inter")
+    with tab1:
+        st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
+        
+        fig = px.scatter(
+            filtered,
+            x="frpm_pct_100",
+            y="admit_rate",
+            size="applicants",
+            color="frpm_pct_100",
+            color_continuous_scale=["#C8B89A", "#8C6D53", "#2C221E"],
+            hover_name="school_name" if "school_name" in filtered.columns else None,
+            hover_data=["applicants", "admits"],
+            labels={
+                "frpm_pct_100": "High School Poverty Rate (% FRPM)",
+                "admit_rate": "UC Admit Rate (%)",
+                "applicants": "Applicant Volume"
+            },
+            trendline="ols",
+            trendline_color_override="#1A1614"
         )
-    )
-    fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
-    st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
-    
-    with st.expander("📉 Socioeconomic Disparity Breakdown"):
-        st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.2f}%**, compared to **{high_rate:.2f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
-
-    with st.expander("🎯 Regression Trendline Analysis"):
-        st.write(f"The downward trendline slope highlights how high school resource density and economic factors systematically correlate with acceptance success into **{selected_campus}**.")
-
-    with st.expander("🏛️ Overall Policy Takeaway"):
-        st.write("Targeted intervention and holistic application reviews are vital for bridging the gap and ensuring high-poverty Bay Area schools have equal pathways into top-tier public universities.")
-
-with tab2:
-    st.markdown("### School Performance Breakdowns")
-    col_left, col_right = st.columns(2)
-
-    display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
-
-    with col_left:
-        st.markdown("**Highest Poverty High Schools**")
-        top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
-        if "frpm_pct_100" in top_pov.columns:
-            top_pov["frpm_pct_100"] = top_pov["frpm_pct_100"].round(2)
-        if "admit_rate" in top_pov.columns:
-            top_pov["admit_rate"] = top_pov["admit_rate"].round(2)
-        st.dataframe(top_pov, hide_index=True, use_container_width=True)
-
-    with col_right:
-        st.markdown("**Lowest Poverty High Schools**")
-        low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
-        if "frpm_pct_100" in low_pov_table.columns:
-            low_pov_table["frpm_pct_100"] = low_pov_table["frpm_pct_100"].round(2)
-        if "admit_rate" in low_pov_table.columns:
-            low_pov_table["admit_rate"] = low_pov_table["admit_rate"].round(2)
-        st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
-
-with tab3:
-    st.markdown("### Distribution of Poverty Across Bay Area High Schools")
-    fig_hist = px.histogram(
-        filtered,
-        x="frpm_pct_100",
-        nbins=25,
-        labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "count": "Number of High Schools"},
-        color_discrete_sequence=["#8C6D53"]
-    )
-    fig_hist.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#F2ECE4",
-        font=dict(color="#1A1614", family="Inter", size=12),
-        height=400,
-        xaxis=dict(
-            showgrid=True, 
-            gridcolor="#E5DCD3",
-            zeroline=True,
-            zerolinewidth=1.5,
-            zerolinecolor="#1A1614",
-            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-            tickfont=dict(size=12, color="#000000", family="Inter")
-        ),
-        yaxis=dict(
-            showgrid=True, 
-            gridcolor="#E5DCD3",
-            zeroline=True,
-            zerolinewidth=1.5,
-            zerolinecolor="#1A1614",
-            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-            tickfont=dict(size=12, color="#000000", family="Inter")
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#F2ECE4",
+            font=dict(color="#1A1614", family="Inter", size=12),
+            coloraxis_showscale=False,
+            height=520,
+            margin=dict(t=20, b=20, l=20, r=20),
+            xaxis=dict(
+                showgrid=True, 
+                gridcolor="#E5DCD3",
+                zeroline=True,
+                zerolinewidth=1.5,
+                zerolinecolor="#1A1614",
+                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                tickfont=dict(size=12, color="#000000", family="Inter")
+            ),
+            yaxis=dict(
+                showgrid=True, 
+                gridcolor="#E5DCD3",
+                zeroline=True,
+                zerolinewidth=1.5,
+                zerolinecolor="#1A1614",
+                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                tickfont=dict(size=12, color="#000000", family="Inter")
+            )
         )
-    )
-    st.plotly_chart(fig_hist, use_container_width=True)
+        fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
+        
+        with st.expander("📉 Socioeconomic Disparity Breakdown"):
+            st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.2f}%**, compared to **{high_rate:.2f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
+
+        with st.expander("🎯 Regression Trendline Analysis"):
+            st.write(f"The downward trendline slope highlights how high school resource density and economic factors systematically correlate with acceptance success into **{selected_campus}**.")
+
+        with st.expander("🏛️ Overall Policy Takeaway"):
+            st.write("Targeted intervention and holistic application reviews are vital for bridging the gap and ensuring high-poverty Bay Area schools have equal pathways into top-tier public universities.")
+
+    with tab2:
+        st.markdown("### School Performance Breakdowns")
+        col_left, col_right = st.columns(2)
+
+        display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
+
+        with col_left:
+            st.markdown("**Highest Poverty High Schools**")
+            top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
+            if "frpm_pct_100" in top_pov.columns:
+                top_pov["frpm_pct_100"] = top_pov["frpm_pct_100"].round(2)
+            if "admit_rate" in top_pov.columns:
+                top_pov["admit_rate"] = top_pov["admit_rate"].round(2)
+            st.dataframe(top_pov, hide_index=True, use_container_width=True)
+
+        with col_right:
+            st.markdown("**Lowest Poverty High Schools**")
+            low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
+            if "frpm_pct_100" in low_pov_table.columns:
+                low_pov_table["frpm_pct_100"] = low_pov_table["frpm_pct_100"].round(2)
+            if "admit_rate" in low_pov_table.columns:
+                low_pov_table["admit_rate"] = low_pov_table["admit_rate"].round(2)
+            st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
+
+    with tab3:
+        st.markdown("### Distribution of Poverty Across Bay Area High Schools")
+        fig_hist = px.histogram(
+            filtered,
+            x="frpm_pct_100",
+            nbins=25,
+            labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "count": "Number of High Schools"},
+            color_discrete_sequence=["#8C6D53"]
+        )
+        fig_hist.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#F2ECE4",
+            font=dict(color="#1A1614", family="Inter", size=12),
+            height=400,
+            xaxis=dict(
+                showgrid=True, 
+                gridcolor="#E5DCD3",
+                zeroline=True,
+                zerolinewidth=1.5,
+                zerolinecolor="#1A1614",
+                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                tickfont=dict(size=12, color="#000000", family="Inter")
+            ),
+            yaxis=dict(
+                showgrid=True, 
+                gridcolor="#E5DCD3",
+                zeroline=True,
+                zerolinewidth=1.5,
+                zerolinecolor="#1A1614",
+                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                tickfont=dict(size=12, color="#000000", family="Inter")
+            )
+        )
+        st.plotly_chart(fig_hist, use_container_width=True)
