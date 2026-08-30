@@ -150,10 +150,10 @@ df = load_data()
 st.markdown("""
 <div class="hero-container">
     <div style="font-size: 1.4rem; font-weight: 800; color: #38BDF8; margin-bottom: 8px; line-height: 1.4;">
-        How do high school socioeconomic contexts (specifically poverty concentrations measured by Free or Reduced-Price Meal percentages) correlate with and impact UC admissions access and outcomes across different Bay Area educational sectors?
+        How do high school socioeconomic contexts (specifically poverty concentrations measured by Free or Reduced-Price Meal percentages) correlate with and impact UC admissions access and outcomes across different UC colleges?
     </div>
     <p class="hero-text">
-        Advanced telemetry tracking student socioeconomic dynamics, poverty concentrations (FRPM), and institutional access across Bay Area educational sectors.
+        Advanced telemetry tracking student socioeconomic dynamics, poverty concentrations (FRPM), and institutional access across UC colleges.
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -259,7 +259,7 @@ else:
         """, unsafe_allow_html=True)
 
         # Histogram Section
-        st.markdown(f"### 📊 Distribution Topology Across Sectors")
+        st.markdown(f"### 📊 Distribution Topology Across UC Colleges")
         fig_hist = px.histogram(filtered, x="frpm_pct_100", nbins=25, labels={"frpm_pct_100": "Poverty Rate (% FRPM)"}, color_discrete_sequence=["#38BDF8"])
         fig_hist.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15, 23, 42, 0.4)", font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12), height=400)
         st.plotly_chart(fig_hist, use_container_width=True)
@@ -269,7 +269,7 @@ else:
         <div class="analysis-box">
             <h4>📈 Histogram Analysis Summary</h4>
             <p style="color: #94A3B8; font-size: 0.9rem; line-height: 1.6; margin-top: 8px;">
-                The distribution histogram illustrates the frequency of high schools across various poverty rate brackets within the dataset. It maps out the broader demographic landscape of the applicant pool, showing whether schools tend to cluster in lower or higher poverty concentrations. This structural view helps establish the baseline representation of different educational sectors in the analysis.
+                The distribution histogram illustrates the frequency of high schools across various poverty rate brackets within the dataset. It maps out the broader demographic landscape of the applicant pool, showing whether schools tend to cluster in lower or higher poverty concentrations. This structural view helps establish the baseline representation of different UC colleges in the analysis.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -295,7 +295,7 @@ else:
             """, unsafe_allow_html=True)
 
     with tab3:
-        st.markdown("### 📋 Sector Performance Indices")
+        st.markdown("### 📋 UC College Performance Indices")
         col_left, col_right = st.columns(2)
         display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
         rename_map = {"high_school": "School Name", "frpm_pct_100": "Poverty Rate (%)", "applicants": "Applicants", "admits": "Admits", "admit_rate": "Admission Rate (%)"}
