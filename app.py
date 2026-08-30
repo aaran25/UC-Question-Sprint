@@ -372,7 +372,7 @@ else:
                 tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             ),
             yaxis=dict(
-                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
                 title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
                 tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             )
@@ -405,17 +405,35 @@ else:
 
     with tab4:
         st.markdown("### 🤖 Advanced Machine Learning Admission Predictor")
-        st.markdown("Simulate an applicant profile by entering academic, major, income, and high school parameters below.")
+        st.markdown("Type your high school name to match records, pick your target UC campus, major, and economic details to calculate your predictive admission percentage.")
 
         col_pred1, col_pred2 = st.columns(2)
+        
+        all_schools = sorted(df["school_name"].dropna().unique()) if "school_name" in df.columns else []
+        
         with col_pred1:
-            input_school = st.selectbox("Select High School", filtered["school_name"].unique() if "school_name" in filtered.columns else ["Default High School"])
+            # Dynamic text search input for high school name
+            search_query = st.text_input("Type High School Name (e.g., Berkeley, Lowell, Gunn):", "")
+            
+            matching_schools = [s for s in all_schools if search_query.lower() in s.lower()] if search_query else all_schools[:50]
+            
+            selected_school_pred = st.selectbox("Matching High Schools Found:", matching_schools if matching_schools else ["No matches found"])
+            
+            # Target UC College selection dropdown
+            target_uc_college = st.selectbox("Target UC College to Apply To:", campuses)
+            
             input_major = st.selectbox("Intended Major Field", ["STEM / Engineering", "Computer Science", "Biological Sciences", "Social Sciences", "Humanities / Arts", "Business / Economics"])
-            input_income = st.number_input("Estimated Household Income ($)", min_value=10000, max_value=500000, value=85000, step=5000)
 
         with col_pred2:
-            input_frpm = st.slider("High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=35.0, step=1.0)
-            input_applicants = st.number_input("Cohort Applicant Volume", min_value=1, max_value=500, value=50)
+            input_income = st.number_input("Estimated Household Income ($)", min_value=10000, max_value=500000, value=85000, step=5000)
+            
+            # Pull actual high school data if available, or fallback to manual slider
+            school_match_row = df[df["school_name"] == selected_school_pred]
+            default_frpm = float(school_match_row["frpm_pct_100"].values[0]) if not school_match_row.empty and "frpm_pct_100" in school_match_row.columns else 35.0
+            default_app_vol = int(school_match_row["applicants"].values[0]) if not school_match_row.empty and "applicants" in school_match_row.columns else 50
+
+            input_frpm = st.slider("High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=default_frpm, step=1.0)
+            input_applicants = st.number_input("Cohort Applicant Volume", min_value=1, max_value=500, value=default_app_vol)
 
         major_weights = {
             "Computer Science": 0.6,
@@ -427,10 +445,12 @@ else:
         }
         major_multiplier = major_weights.get(input_major, 1.0)
 
-        ml_data = filtered.dropna(subset=["frpm_pct_100", "applicants", "admit_rate"])
-        if len(ml_data) > 10:
-            X = ml_data[["frpm_pct_100", "applicants"]]
-            y = ml_data["admit_rate"]
+        # Train model specifically based on the target UC college selected
+        prediction_target_data = df[df["campus"] == target_uc_college].dropna(subset=["frpm_pct_100", "applicants", "admit_rate"])
+        
+        if len(prediction_target_data) > 10:
+            X = prediction_target_data[["frpm_pct_100", "applicants"]]
+            y = prediction_target_data["admit_rate"]
             
             model = RandomForestRegressor(n_estimators=100, random_state=42)
             model.fit(X, y)
@@ -440,7 +460,7 @@ else:
             
             st.write("")
             st.markdown("#### Predicted Outcome:")
-            st.metric(label=f"Expected Admit Rate for {selected_campus} ({input_major})", value=f"{max(0.0, min(100.0, final_prediction)):.2f}%")
-            st.info(f"💡 **Simulator Logic:** This model evaluates baseline historical rates for **{selected_campus}** based on school poverty and size, then applies a structural selectivity adjustment for **{input_major}**.")
+            st.metric(label=f"Expected Admit Rate for {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_prediction)):.2f}%")
+            st.info(f"💡 **Simulator Logic:** Evaluates historical trends for **{target_uc_college}** given **{selected_school_pred}'s** poverty profile, adjusted for the competitiveness of **{input_major}**.")
         else:
-            st.warning("Not enough data points in the current selection to train the prediction model.")
+            st.warning(f"Not enough data points available for **{target_uc_college}** to run the model.")
