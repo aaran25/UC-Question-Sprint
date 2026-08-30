@@ -74,7 +74,7 @@ st.markdown("""
         margin: 0;
     }
 
-    /* Style Streamlit Tabs for Black Text and Rounded Hover/Active State */
+    /* Streamlit Tabs Styling: Black text, subtle rounded backgrounds on hover */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: transparent;
@@ -83,12 +83,12 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         height: 48px;
         background-color: #FFFFFF;
-        border-radius: 12px 12px 0 0;
+        border-radius: 12px;
         border: 1px solid #E8E0D5;
-        border-bottom: none;
         padding: 0 20px;
         color: #1A1614 !important;
         font-weight: 700;
+        font-size: 0.95rem;
     }
     
     .stTabs [data-baseweb="tab"]:hover {
@@ -193,7 +193,7 @@ else:
 
     st.write("")
 
-    # 8. Standard Native Streamlit Tabs with custom CSS styling for text and rounded hover states
+    # 8. Standard Native Streamlit Tabs with updated typography & fully rounded hover containers
     tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
 
     with tab1:
