@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from sklearn.ensemble import RandomForestRegressor
 
 # 1. Page Configuration
 st.set_page_config(
@@ -202,8 +203,8 @@ else:
 
     st.write("")
 
-    # 8. Standard Native Streamlit Tabs with custom styling
-    tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
+    # 8. Standard Native Streamlit Tabs with custom styling (Added Predictor Tab!)
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Visual Analysis", "📋 School Leaderboards", "📈 Distribution Overview", "🤖 AI Admission Predictor"])
 
     with tab1:
         st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
@@ -288,7 +289,8 @@ else:
         st.markdown("### School Performance Breakdowns")
         
         st.markdown("""
-        > **How to read these tables:** > * **School Name:** The high school evaluated.
+        > **How to read these tables:** 
+        > * **School Name:** The high school evaluated.
         > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
         > * **Applicants:** Total number of students who applied to this UC campus from the school.
         > * **Admits:** Total number of students accepted.
@@ -404,3 +406,31 @@ else:
             )
             fig_line3.update_traces(line=dict(width=3))
             st.plotly_chart(fig_line3, use_container_width=True)
+
+    with tab4:
+        st.markdown("### 🤖 Machine Learning Admission Rate Predictor")
+        st.markdown("Use this interactive simulator powered by a **Random Forest Regressor** trained on historical high school data to predict expected admission success for **" + selected_campus + "**.")
+
+        col_pred1, col_pred2 = st.columns(2)
+        with col_pred1:
+            input_frpm = st.slider("Simulated High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=35.0, step=1.0)
+            input_applicants = st.number_input("Simulated Cohort Applicant Volume", min_value=1, max_value=500, value=50)
+
+        with col_pred2:
+            # Train model on the fly using filtered data features
+            ml_data = filtered.dropna(subset=["frpm_pct_100", "applicants", "admit_rate"])
+            if len(ml_data) > 10:
+                X = ml_data[["frpm_pct_100", "applicants"]]
+                y = ml_data["admit_rate"]
+                
+                model = RandomForestRegressor(n_estimators=100, random_state=42)
+                model.fit(X, y)
+                
+                prediction = model.predict([[input_frpm, input_applicants]])[0]
+                
+                st.write("")
+                st.markdown("#### Predicted Outcome:")
+                st.metric(label=f"Expected Admit Rate for {selected_campus}", value=f"{max(0.0, prediction):.2f}%")
+                st.info("💡 **Model Note:** The prediction uses machine learning to evaluate historical trends based on input poverty density and cohort application size.")
+            else:
+                st.warning("Not enough data points in the current selection to train the prediction model.")
