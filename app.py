@@ -204,7 +204,7 @@ else:
 
     st.write("")
 
-    # 8. Tabs Configuration (Demographic Spectrum removed)
+    # 8. Tabs Configuration
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Visual Telemetry", 
         "⚖️ Equity & Opportunity Gap", 
@@ -216,50 +216,32 @@ else:
     with tab1:
         st.markdown(f"### 🔍 Telemetry Grid: Socioeconomic Impact vs. Admission Rate ({selected_year})")
         
-        col_fig, col_stat = st.columns([2, 1])
-        
-        with col_fig:
-            fig = px.scatter(
-                filtered,
-                x="frpm_pct_100",
-                y="admit_rate",
-                size="applicants",
-                color="frpm_pct_100",
-                color_continuous_scale=["#38BDF8", "#0284C7", "#0369A1", "#0F172A"],
-                hover_name="high_school" if "high_school" in filtered.columns else None,
-                hover_data=["applicants", "admits"],
-                labels={"frpm_pct_100": "High School Poverty Rate (% FRPM)", "admit_rate": "UC Admission Rate (%)"},
-                trendline="ols",
-                trendline_color_override="#38BDF8"
-            )
-            fig.update_layout(
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(15, 23, 42, 0.4)",
-                font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12),
-                coloraxis_showscale=False,
-                height=450,
-                margin=dict(t=10, b=10, l=10, r=10),
-                xaxis=dict(showgrid=True, gridcolor="rgba(56, 189, 248, 0.1)", zeroline=True, zerolinecolor="rgba(56, 189, 248, 0.3)"),
-                yaxis=dict(showgrid=True, gridcolor="rgba(56, 189, 248, 0.1)", zeroline=True, zerolinecolor="rgba(56, 189, 248, 0.3)")
-            )
-            fig.update_traces(marker=dict(opacity=0.9, line=dict(width=1, color="#38BDF8")))
-            st.plotly_chart(fig, use_container_width=True)
-
-        with col_stat:
-            st.markdown("##### 🔬 Statistical Proof")
-            st.markdown(f"""
-            <div class="analysis-box" style="margin-top: 5px;">
-                <p style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 4px;"><b>Correlation ($r$):</b></p>
-                <p style="color: #38BDF8; font-size: 1.2rem; font-weight: 900; margin-top: 0;">{r_val:.3f}</p>
-                
-                <p style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 4px;"><b>Significance ($p$-value):</b></p>
-                <p style="color: #38BDF8; font-size: 1.2rem; font-weight: 900; margin-top: 0;">{"< 0.001" if p_val < 0.001 else f"{p_val:.3f}"}</p>
-                
-                <p style="color: #94A3B8; font-size: 0.75rem; line-height: 1.3; margin-top: 6px;">
-                    {f"Proves a positive relationship" if r_val > 0 else f"Proves a negative relationship"}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+        # Full width scatter plot without side stats column
+        fig = px.scatter(
+            filtered,
+            x="frpm_pct_100",
+            y="admit_rate",
+            size="applicants",
+            color="frpm_pct_100",
+            color_continuous_scale=["#38BDF8", "#0284C7", "#0369A1", "#0F172A"],
+            hover_name="high_school" if "high_school" in filtered.columns else None,
+            hover_data=["applicants", "admits"],
+            labels={"frpm_pct_100": "High School Poverty Rate (% FRPM)", "admit_rate": "UC Admission Rate (%)"},
+            trendline="ols",
+            trendline_color_override="#38BDF8"
+        )
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(15, 23, 42, 0.4)",
+            font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12),
+            coloraxis_showscale=False,
+            height=450,
+            margin=dict(t=10, b=10, l=10, r=10),
+            xaxis=dict(showgrid=True, gridcolor="rgba(56, 189, 248, 0.1)", zeroline=True, zerolinecolor="rgba(56, 189, 248, 0.3)"),
+            yaxis=dict(showgrid=True, gridcolor="rgba(56, 189, 248, 0.1)", zeroline=True, zerolinecolor="rgba(56, 189, 248, 0.3)")
+        )
+        fig.update_traces(marker=dict(opacity=0.9, line=dict(width=1, color="#38BDF8")))
+        st.plotly_chart(fig, use_container_width=True)
 
         # Summary Paragraphs for Scatter Plot
         st.markdown(f"""
