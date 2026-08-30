@@ -235,7 +235,7 @@ else:
                 color_continuous_scale=["#38BDF8", "#0284C7", "#0369A1", "#0F172A"],
                 hover_name="high_school" if "high_school" in filtered.columns else None,
                 hover_data=["applicants", "admits"],
-                labels={"frpm_pct_100": "High School Poverty Rate (% FRPM)", "admit_rate": "UC Admit Rate (%)"},
+                labels={"frpm_pct_100": "High School Poverty Rate (% FRPM)", "admit_rate": "UC Admission Rate (%)"},
                 trendline="ols",
                 trendline_color_override="#38BDF8"
             )
