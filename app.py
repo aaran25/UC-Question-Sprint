@@ -256,19 +256,19 @@ else:
             st.markdown("##### 🔬 Statistical Proof")
             st.markdown(f"""
             <div class="analysis-box" style="margin-top: 5px;">
-                <p style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 4px;"><b>Pearson Correlation ($r$):</b></p>
+                <p style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 4px;"><b>Correlation ($r$):</b></p>
                 <p style="color: #38BDF8; font-size: 1.2rem; font-weight: 900; margin-top: 0;">{r_val:.3f}</p>
                 
                 <p style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 4px;"><b>Significance ($p$-value):</b></p>
                 <p style="color: #38BDF8; font-size: 1.2rem; font-weight: 900; margin-top: 0;">{"< 0.001" if p_val < 0.001 else f"{p_val:.3f}"}</p>
                 
                 <p style="color: #94A3B8; font-size: 0.75rem; line-height: 1.3; margin-top: 6px;">
-                    Proves a rigorous, statistically meaningful inverse correlation between school poverty concentrations and admission success.
+                    Proves a rigorous inverse relationship between school poverty concentration and admission success.
                 </p>
             </div>
             """, unsafe_allow_html=True)
 
-        # Regression Impact Breakdown
+        # Regression Impact Breakdown with Plain-English Explanations
         lin_model = LinearRegression()
         X_reg = filtered[["frpm_pct_100"]]
         y_reg = filtered["admit_rate"]
@@ -277,15 +277,28 @@ else:
 
         st.markdown(f"""
         <div class="analysis-box">
-            <h4>📊 Regression Impact Breakdown</h4>
-            <p style="color: #94A3B8; margin-bottom: 8px; font-size: 0.9rem;">
-                Ordinary Least Squares (OLS) model output for <b>{selected_campus}</b> ({selected_year}):
+            <h4>📊 Regression Impact Breakdown & Plain-English Translation</h4>
+            <p style="color: #94A3B8; margin-bottom: 12px; font-size: 0.9rem;">
+                Mathematical breakdown mapping how high school poverty levels change acceptance outcomes at <b>{selected_campus}</b> ({selected_year}):
             </p>
-            <ul style="color: #F8FAFC; line-height: 1.5; font-size: 0.9rem;">
-                <li><b>Slope Coefficient:</b> <code>{slope:.4f}</code>% change in acceptance rate per 1% increase in high school poverty.</li>
-                <li><b>Baseline Affluent Intercept:</b> <code>{intercept:.2f}%</code> predicted admission rate at 0% poverty.</li>
-                <li><b>Variance Explainer ($R^2$):</b> <code>{r_sq:.3f}</code></li>
-            </ul>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.15);">
+                    <b style="color: #38BDF8; font-size: 0.85rem;">STATISTICAL METRIC</b>
+                    <ul style="color: #F8FAFC; padding-left: 15px; margin-top: 6px; font-size: 0.85rem; line-height: 1.5;">
+                        <li><b>Slope:</b> <code>{slope:.4f}</code></li>
+                        <li><b>Baseline Intercept:</b> <code>{intercept:.2f}%</code></li>
+                        <li><b>Variance Fit ($R^2$):</b> <code>{r_sq:.3f}</code></li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.15);">
+                    <b style="color: #38BDF8; font-size: 0.85rem;">WHAT THIS MEANS FOR JUDGES</b>
+                    <p style="color: #94A3B8; font-size: 0.8rem; margin: 6px 0 0 0; line-height: 1.4;">
+                        For every <b>10% increase</b> in a school's poverty rate, the acceptance rate shifts by <b>{(slope * 10):.2f}%</b>. The baseline shows what a wealthy school with 0% poverty expects to get, proving a clear structural penalty tied to geography and income.
+                    </p>
+                </div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
