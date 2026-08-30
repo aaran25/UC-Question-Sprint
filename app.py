@@ -329,10 +329,12 @@ else:
         if len(prediction_target_data) > 10:
             model = RandomForestRegressor(n_estimators=100, random_state=42)
             model.fit(prediction_target_data[["frpm_pct_100", "applicants"]], prediction_target_data["admit_rate"])
-            final_pred = model.predict([[input_frpm, input_applicants]])[0] * major_weights.get(input_major, 1.0)
+            # Multiply prediction by 100 since admit_rate in data is out of 100 (e.g., 20.5 instead of 0.205)
+            raw_pred = model.predict([[input_frpm, input_applicants]])[0] * major_weights.get(input_major, 1.0)
+            final_pred_pct = max(0.0, min(100.0, raw_pred))
             
             st.write("")
-            st.metric(label=f"Predicted Acceptance Probability — {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_pred)):.2f}%")
+            st.metric(label=f"Predicted Acceptance Probability — {target_uc_college} ({input_major})", value=f"{final_pred_pct:.2f}%")
 
     with tab5:
         st.markdown("### 🚀 Your Personal Game Plan to Crush College Admissions!")
