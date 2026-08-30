@@ -372,7 +372,7 @@ else:
                 tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             ),
             yaxis=dict(
-                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
                 title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
                 tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             )
@@ -405,14 +405,14 @@ else:
 
     with tab4:
         st.markdown("### 🤖 Advanced Machine Learning Admission Predictor")
-        st.markdown("Type your high school name to match records, pick your target UC campus, major, and economic details to calculate your predictive admission percentage.")
+        st.markdown("Type letters to filter matching high schools from your dataset, pick your target UC college, major, and economic details to calculate your predictive admission percentage.")
 
         col_pred1, col_pred2 = st.columns(2)
         
         all_schools = sorted(df["school_name"].dropna().unique()) if "school_name" in df.columns else []
         
         with col_pred1:
-            # Dynamic text search input for high school name
+            # Dynamic type-to-search input
             search_query = st.text_input("Type High School Name (e.g., Berkeley, Lowell, Gunn):", "")
             
             matching_schools = [s for s in all_schools if search_query.lower() in s.lower()] if search_query else all_schools[:50]
@@ -427,7 +427,7 @@ else:
         with col_pred2:
             input_income = st.number_input("Estimated Household Income ($)", min_value=10000, max_value=500000, value=85000, step=5000)
             
-            # Pull actual high school data if available, or fallback to manual slider
+            # Auto-populate metrics from database if matched
             school_match_row = df[df["school_name"] == selected_school_pred]
             default_frpm = float(school_match_row["frpm_pct_100"].values[0]) if not school_match_row.empty and "frpm_pct_100" in school_match_row.columns else 35.0
             default_app_vol = int(school_match_row["applicants"].values[0]) if not school_match_row.empty and "applicants" in school_match_row.columns else 50
