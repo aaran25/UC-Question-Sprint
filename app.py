@@ -9,7 +9,7 @@ st.markdown("Analyzing UC admission outcomes across Bay Area high schools based 
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("bay_area_modeling_table.csv(1)", low_memory=False)
+    df = pd.read_csv("bay_area_modeling_table.csv", low_memory=False)
     return df
 
 df = load_data()
