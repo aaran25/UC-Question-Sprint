@@ -204,14 +204,14 @@ else:
 
     st.write("")
 
-    # 8. Tabs Configuration (Added Tab 6 for Opportunities)
+    # 8. Tabs Configuration
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📊 Visual Telemetry", 
         "⚖️ Equity & Opportunity Gap", 
         "📋 Sector Leaderboards", 
         "📈 Demographic Spectrum", 
         "🤖 Neural Predictor Matrix",
-        "🎯 Opportunity & Action Plan"
+        "🎯 Your College Game Plan"
     ])
 
     with tab1:
@@ -366,10 +366,9 @@ else:
             st.metric(label=f"Predicted Acceptance Probability — {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_pred)):.2f}%")
 
     with tab6:
-        st.markdown("### 🎯 Local Opportunity & Strategic Action Plan")
-        st.markdown("Based on your selected high school profile and institutional parameters, here is a customized roadmap to strengthen your extracurricular and academic portfolio:")
+        st.markdown("### 🚀 Your Personal Game Plan to Crush College Admissions!")
+        st.markdown("Hey! College admissions can feel overwhelming, but you've got this. Because universities like **" + str(selected_campus) + "** look at your achievements **in context** of your high school environment, your hard work shines even brighter. Here is an actionable roadmap to level up your profile:")
         
-        # Pull high school context safely
         active_school = locals().get('selected_school_pred', 'Your School')
         school_row = df[df["high_school"] == active_school] if 'active_school' in locals() and not df.empty else pd.DataFrame()
         school_poverty = float(school_row["frpm_pct_100"].values[0]) if not school_row.empty and "frpm_pct_100" in school_row.columns else 30.0
@@ -379,14 +378,14 @@ else:
         with col_op1:
             st.markdown(f"""
             <div class="analysis-box">
-                <h4>🤝 Community & Leadership Builder</h4>
+                <h4>💡 Stand Out Through Real Impact</h4>
                 <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 10px;">
-                    Since your school has an FRPM poverty concentration index of <b>{school_poverty:.1f}%</b>, admissions teams evaluate your achievements within your local context (Comprehensive Review).
+                    Your school's environment has a poverty index of <b>{school_poverty:.1f}%</b>. Admissions officers want to see what you made out of the opportunities around you!
                 </p>
                 <ul style="color: #F8FAFC; padding-left: 18px; margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
-                    <li><b>Local Community Service:</b> Look into regional food banks, library tutoring programs, or youth mentorship initiatives near your district.</li>
-                    <li><b>School-Based Leadership:</b> Start or step up as an officer in an academic club, cultural club, or student council to demonstrate initiative.</li>
-                    <li><b>Family Responsibilities:</b> If you help care for siblings or work a part-time job, explicitly log this in the UC application activity section—colleges highly value contextual responsibilities.</li>
+                    <li><b>Get Involved Locally:</b> Find local food banks, community centers, libraries, or youth groups where you can consistently show up and help out.</li>
+                    <li><b>Lead the Way:</b> Step up in school clubs, start a new student group, or take charge of a community project. Leadership matters way more than just a long list of random clubs!</li>
+                    <li><b>Own Your Responsibilities:</b> Do you help take care of younger siblings or work a part-time job? <em>Definitely</em> put that down on your application. Colleges deeply respect students who balance family or work obligations.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
@@ -394,14 +393,14 @@ else:
         with col_op2:
             st.markdown(f"""
             <div class="analysis-box">
-                <h4>📚 Academic & Testing Strategy</h4>
+                <h4>🎯 Academic & Application Power-Ups</h4>
                 <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 10px;">
-                    Tailored path for applicants targeting <b>{selected_campus}</b>:
+                    Smart steps to make your application pop for <b>{selected_campus}</b>:
                 </p>
                 <ul style="color: #F8FAFC; padding-left: 18px; margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
-                    <li><b>UC Test-Free Policy Note:</b> Remember that UCs do not use SAT/ACT scores for admissions or scholarship selection, so focus heavily on your <b>A-G course GPA</b> and rigorous honors/AP/IB classes.</li>
-                    <li><b>Pre-College Enrichment:</b> Check out online or local UC extension programs (like COSMOS or UC-sponsored summer academies) that cater to high schoolers in your area.</li>
-                    <li><b>Personal Insight Questions (PIQs):</b> Leverage your unique school environment and hurdles overcome in your 4 short essay responses.</li>
+                    <li><b>Crush Your A-G Courses:</b> Since UCs are completely test-free (no SAT/ACT score stress!), your GPA and challenging AP, IB, or honors classes are your absolute best friends.</li>
+                    <li><b>Look into Pre-College Programs:</b> Check out free or low-cost summer programs, local community college courses, or virtual STEM/humanities camps to show extra curiosity.</li>
+                    <li><b>Tell Your Unique Story:</b> Your Personal Insight Questions (PIQs) are your chance to speak directly to the admissions team. Share your real voice, what challenges you've conquered, and what you're passionate about!</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
