@@ -327,10 +327,10 @@ else:
         with col_pred1:
             st.markdown("##### 🏫 High School Selection")
             selected_school_pred = st.selectbox(
-                "Search and select high school name:", 
+                "Select high school name:", 
                 options=all_schools,
                 index=0 if all_schools else None,
-                placeholder="Type to search high school..."
+                label_visibility="collapsed"
             )
             
             st.markdown("##### 🏛️ Target UC College")
@@ -341,7 +341,7 @@ else:
 
         with col_pred2:
             st.markdown("##### 💰 Estimated Household Income")
-            input_income = st.number_input("Enter annual household income ($):", min_value=10000, max_value=500000, value=85000, step=5000, format="$%d", label_visibility="collapsed")
+            input_income = st.number_input("Enter annual household income ($):", min_value=10000, max_value=500000, value=85000, step=5000, label_visibility="collapsed")
             
             # Safe match lookup with error handling
             school_match_row = df[df["school_name"] == selected_school_pred] if selected_school_pred else pd.DataFrame()
