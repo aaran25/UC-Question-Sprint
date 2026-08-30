@@ -9,25 +9,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & High-Contrast Tab & Typography Styling
+# 2. Vibrant Aesthetic & Modern Typography Styling
 st.markdown("""
     <style>
     .stApp {
-        background-color: #FAF7F2;
-        color: #1A1614;
-        font-family: 'Inter', -apple-system, sans-serif;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
     }
     section[data-testid="stSidebar"] {
-        background-color: #F2ECE4;
-        border-right: 1px solid #E5DCD3;
+        background-color: #EEF2F6;
+        border-right: 1px solid #E2E8F0;
     }
     
     div[data-testid="stMetric"] {
         background-color: #FFFFFF;
-        border: 1px solid #E8E0D5;
+        border: 1px solid #E2E8F0;
         padding: 16px 20px;
-        border-radius: 14px;
-        box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.05), 0 8px 10px -6px rgba(59, 130, 246, 0.05);
         min-height: 110px;
         display: flex;
         flex-direction: column;
@@ -35,90 +35,99 @@ st.markdown("""
     }
     
     h1, h2, h3, h4 {
-        color: #1A1614 !important;
-        font-weight: 700;
+        color: #0F172A !important;
+        font-weight: 800;
+        letter-spacing: -0.025em;
     }
     
     [data-testid="stMetricLabel"] {
-        color: #594D47 !important;
-        font-size: 0.8rem !important;
+        color: #64748B !important;
+        font-size: 0.75rem !important;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
+        letter-spacing: 0.08em;
+        font-weight: 700;
         white-space: normal !important;
     }
     [data-testid="stMetricValue"] {
-        color: #1A1614 !important;
-        font-size: 1.5rem !important;
-        font-weight: 800;
+        color: #2563EB !important;
+        font-size: 1.6rem !important;
+        font-weight: 900;
         white-space: nowrap;
     }
 
     .hero-container {
-        background-color: #F2ECE4;
-        padding: 24px 30px;
-        border-radius: 16px;
-        border: 1px solid #E5DCD3;
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+        padding: 30px 35px;
+        border-radius: 20px;
+        border: none;
+        margin-bottom: 25px;
+        box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.2);
     }
     .hero-title {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #1A1614;
-        margin-bottom: 10px;
+        font-size: 1.7rem;
+        font-weight: 900;
+        color: #FFFFFF;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
     }
     .hero-text {
         font-size: 1.05rem;
         line-height: 1.6;
-        color: #3C3431;
+        color: #E2E8F0;
         margin: 0;
+        font-weight: 400;
     }
 
-    /* Streamlit Tabs Styling: Black text, subtle rounded backgrounds on hover */
+    /* Streamlit Tabs Styling: Vibrant, modern rounded cards with smooth hover */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 10px;
         background-color: transparent;
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 48px;
+        height: 50px;
         background-color: #FFFFFF;
-        border-radius: 12px;
-        border: 1px solid #E8E0D5;
-        padding: 0 20px;
-        color: #1A1614 !important;
+        border-radius: 14px;
+        border: 1px solid #E2E8F0;
+        padding: 0 24px;
+        color: #334155 !important;
         font-weight: 700;
         font-size: 0.95rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        transition: all 0.2s ease;
     }
     
     .stTabs [data-baseweb="tab"]:hover {
-        background-color: #F2ECE4 !important;
-        color: #1A1614 !important;
-        border-radius: 12px !important;
+        background-color: #EFF6FF !important;
+        color: #2563EB !important;
+        border-color: #BFDBFE !important;
+        border-radius: 14px !important;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #1A1614 !important;
-        color: #FAF7F2 !important;
-        border-radius: 12px !important;
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+        color: #FFFFFF !important;
+        border-color: transparent !important;
+        border-radius: 14px !important;
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3) !important;
     }
 
     /* Rounded Styling for Expander Dropdowns */
     div[data-testid="stExpander"] {
         background-color: #FFFFFF;
-        border: 1px solid #E8E0D5;
-        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
         margin-bottom: 15px;
-        box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
     div[data-testid="stExpander"] div[role="region"] {
         background-color: #FFFFFF;
-        color: #2C221E !important;
+        color: #1E293B !important;
         font-size: 1rem !important;
         line-height: 1.6 !important;
-        padding: 15px 20px;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
+        padding: 20px;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -193,7 +202,7 @@ else:
 
     st.write("")
 
-    # 8. Standard Native Streamlit Tabs with updated typography & fully rounded hover containers
+    # 8. Standard Native Streamlit Tabs with custom styling
     tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
 
     with tab1:
@@ -205,7 +214,7 @@ else:
             y="admit_rate",
             size="applicants",
             color="frpm_pct_100",
-            color_continuous_scale=["#C8B89A", "#8C6D53", "#2C221E"],
+            color_continuous_scale=["#93C5FD", "#3B82F6", "#1D4ED8", "#1E3A8A"],
             hover_name="school_name" if "school_name" in filtered.columns else None,
             hover_data=["applicants", "admits"],
             labels={
@@ -214,37 +223,55 @@ else:
                 "applicants": "Applicant Volume"
             },
             trendline="ols",
-            trendline_color_override="#1A1614"
+            trendline_color_override="#EF4444"
         )
 
         fig.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="#F2ECE4",
-            font=dict(color="#1A1614", family="Inter", size=12),
+            plot_bgcolor="#FFFFFF",
+            font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
             coloraxis_showscale=False,
-            height=520,
+            height=500,
             margin=dict(t=20, b=20, l=20, r=20),
             xaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
+                tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             ),
             yaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
+                tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             )
         )
-        fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
+        fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FFFFFF")))
         st.plotly_chart(fig, use_container_width=True)
+
+        # Line Graph 1: Average Admission Rate by Poverty Decile / Bins
+        st.markdown("### 📉 Trend Line: Average Admission Rate Across Poverty Brackets")
+        if not filtered.empty:
+            filtered["poverty_bin"] = pd.cut(filtered["frpm_pct_100"], bins=10, labels=[f"{i*10}-{(i+1)*10}%" for i in range(10)])
+            trend_df = filtered.groupby("poverty_bin", observed=False)["admit_rate"].mean().reset_index()
+            
+            fig_line1 = px.line(
+                trend_df,
+                x="poverty_bin",
+                y="admit_rate",
+                markers=True,
+                labels={"poverty_bin": "Poverty Bracket (% FRPM)", "admit_rate": "Average Admit Rate (%)"},
+                color_discrete_sequence=["#3B82F6"]
+            )
+            fig_line1.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#FFFFFF",
+                font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
+                height=350,
+                margin=dict(t=20, b=20, l=20, r=20),
+                xaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold")),
+                yaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold"))
+            )
+            fig_line1.update_traces(line=dict(width=3), marker=dict(size=8))
+            st.plotly_chart(fig_line1, use_container_width=True)
 
         st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
         
@@ -300,6 +327,33 @@ else:
                 low_pov_table["Acceptance Rate (%)"] = low_pov_table["Acceptance Rate (%)"].round(2)
             st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
+        # Line Graph 2: Total Applicants vs Total Admits by Poverty Level
+        st.markdown("### 📈 Trend Line: Volume Comparison (Applicants vs. Admits)")
+        if not filtered.empty:
+            vol_df = filtered.groupby("poverty_bin", observed=False)[["applicants", "admits"]].sum().reset_index()
+            vol_melted = vol_df.melt(id_vars="poverty_bin", value_vars=["applicants", "admits"], var_name="Metric", value_name="Total Count")
+            
+            fig_line2 = px.line(
+                vol_melted,
+                x="poverty_bin",
+                y="Total Count",
+                color="Metric",
+                markers=True,
+                labels={"poverty_bin": "Poverty Bracket (% FRPM)", "Total Count": "Count"},
+                color_discrete_map={"applicants": "#3B82F6", "admits": "#10B981"}
+            )
+            fig_line2.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#FFFFFF",
+                font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
+                height=350,
+                margin=dict(t=20, b=20, l=20, r=20),
+                xaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold")),
+                yaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold"))
+            )
+            fig_line2.update_traces(line=dict(width=3), marker=dict(size=8))
+            st.plotly_chart(fig_line2, use_container_width=True)
+
     with tab3:
         st.markdown("### Distribution of Poverty Across Bay Area High Schools")
         fig_hist = px.histogram(
@@ -307,30 +361,47 @@ else:
             x="frpm_pct_100",
             nbins=25,
             labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "count": "Number of High Schools"},
-            color_discrete_sequence=["#8C6D53"]
+            color_discrete_sequence=["#3B82F6"]
         )
         fig_hist.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="#F2ECE4",
-            font=dict(color="#1A1614", family="Inter", size=12),
+            plot_bgcolor="#FFFFFF",
+            font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
             height=400,
             xaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
+                tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             ),
             yaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
+                tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             )
         )
         st.plotly_chart(fig_hist, use_container_width=True)
+
+        # Line Graph 3: Cumulative School Count Distribution by Poverty Rate
+        st.markdown("### 📈 Trend Line: Cumulative High School Distribution")
+        if not filtered.empty:
+            cum_df = filtered.sort_values("frpm_pct_100").copy()
+            cum_df["Cumulative Schools"] = range(1, len(cum_df) + 1)
+            
+            fig_line3 = px.line(
+                cum_df,
+                x="frpm_pct_100",
+                y="Cumulative Schools",
+                labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "Cumulative Schools": "Cumulative Number of Schools"},
+                color_discrete_sequence=["#8B5CF6"]
+            )
+            fig_line3.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#FFFFFF",
+                font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
+                height=350,
+                margin=dict(t=20, b=20, l=20, r=20),
+                xaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold")),
+                yaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold"))
+            )
+            fig_line3.update_traces(line=dict(width=3))
+            st.plotly_chart(fig_line3, use_container_width=True)
