@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & High-Contrast Typography Styling (Rounded Modals/Expanders & Icons)
+# 2. Creamy Aesthetic & High-Contrast Tab Styling
 st.markdown("""
     <style>
     .stApp {
@@ -22,7 +22,6 @@ st.markdown("""
         border-right: 1px solid #E5DCD3;
     }
     
-    /* Ensure metric cards have adequate height and no text clipping */
     div[data-testid="stMetric"] {
         background-color: #FFFFFF;
         border: 1px solid #E8E0D5;
@@ -75,18 +74,28 @@ st.markdown("""
         margin: 0;
     }
     
-    /* Rounded Styling for Expander Dropdowns (Pop-up boxes) */
-    .streamlit-expanderHeader {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E8E0D5 !important;
-        border-radius: 12px !important;
-        color: #1A1614 !important;
-        font-weight: 700 !important;
-        font-size: 1.05rem !important;
-        padding: 12px 18px !important;
-        box-shadow: 0 2px 6px rgba(46, 39, 36, 0.02);
+    /* Clean Tab Styling with Explicit Text Contrast */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background-color: transparent;
     }
-    
+    .stTabs [data-baseweb="tab"] {
+        background-color: #F2ECE4;
+        border-radius: 10px;
+        padding: 10px 20px;
+        color: #2C221E !important;
+        border: 1px solid #E5DCD3;
+        font-weight: 700;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #1A1614 !important;
+        color: #FAF7F2 !important;
+    }
+    .stTabs [aria-selected="true"] p {
+        color: #FAF7F2 !important;
+    }
+
+    /* Rounded Styling for Expander Dropdowns */
     div[data-testid="stExpander"] {
         background-color: #FFFFFF;
         border: 1px solid #E8E0D5;
@@ -94,8 +103,6 @@ st.markdown("""
         margin-bottom: 15px;
         box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
     }
-
-    /* Expander Content Readability */
     div[data-testid="stExpander"] div[role="region"] {
         background-color: #FFFFFF;
         color: #2C221E !important;
@@ -104,43 +111,6 @@ st.markdown("""
         padding: 15px 20px;
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 12px;
-    }
-
-    .insight-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E8E0D5;
-        padding: 22px;
-        border-radius: 14px;
-        box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
-        margin-bottom: 20px;
-    }
-    .insight-title {
-        font-weight: 700;
-        color: #1A1614;
-        font-size: 1.1rem;
-        margin-bottom: 8px;
-    }
-    .insight-desc {
-        color: #3C3431;
-        font-size: 0.95rem;
-        line-height: 1.5;
-        margin: 0;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: transparent;
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #F2ECE4;
-        border-radius: 8px;
-        padding: 10px 20px;
-        color: #3C3431;
-        border: 1px solid #E5DCD3;
-        font-weight: 600;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #1A1614 !important;
-        color: #FAF7F2 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -253,8 +223,7 @@ with tab1:
     fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
     st.plotly_chart(fig, use_container_width=True)
 
-    # Interactive Expandable Rounded Cards (Replacing standard blocks with clean clickable pop-ups)
-    st.markdown("### 🔍 Deep-Dive Insights (Click to expand)")
+    st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
     
     with st.expander("📉 Socioeconomic Disparity Breakdown"):
         st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.1f}%**, compared to **{high_rate:.1f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
