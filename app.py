@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & High-Contrast Typography Styling (Fixed Metric Cutoffs)
+# 2. Creamy Aesthetic & High-Contrast Typography Styling (Rounded Modals/Expanders & Icons)
 st.markdown("""
     <style>
     .stApp {
@@ -40,7 +40,6 @@ st.markdown("""
         font-weight: 700;
     }
     
-    /* Responsive metric labels and values to prevent overflow/cutting off */
     [data-testid="stMetricLabel"] {
         color: #594D47 !important;
         font-size: 0.8rem !important;
@@ -75,6 +74,38 @@ st.markdown("""
         color: #3C3431;
         margin: 0;
     }
+    
+    /* Rounded Styling for Expander Dropdowns (Pop-up boxes) */
+    .streamlit-expanderHeader {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E8E0D5 !important;
+        border-radius: 12px !important;
+        color: #1A1614 !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        padding: 12px 18px !important;
+        box-shadow: 0 2px 6px rgba(46, 39, 36, 0.02);
+    }
+    
+    div[data-testid="stExpander"] {
+        background-color: #FFFFFF;
+        border: 1px solid #E8E0D5;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
+    }
+
+    /* Expander Content Readability */
+    div[data-testid="stExpander"] div[role="region"] {
+        background-color: #FFFFFF;
+        color: #2C221E !important;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+        padding: 15px 20px;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
     .insight-card {
         background-color: #FFFFFF;
         border: 1px solid #E8E0D5;
@@ -166,7 +197,7 @@ high_rate = (high_pov["admits"].sum() / high_pov["applicants"].sum() * 100) if h
 low_rate = (low_pov["admits"].sum() / low_pov["applicants"].sum() * 100) if low_pov["applicants"].sum() > 0 else 0
 rate_diff = low_rate - high_rate
 
-# 7. Metrics Row (Clean labels to prevent wrapping/clipping issues)
+# 7. Metrics Row
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Campus", selected_campus)
 col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.1f}%")
@@ -222,29 +253,17 @@ with tab1:
     fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
     st.plotly_chart(fig, use_container_width=True)
 
-    # Mini Visual Takeaway Cards underneath chart
-    st.markdown("### 💡 Key Insights & Takeaways")
-    ic1, ic2 = st.columns(2)
+    # Interactive Expandable Rounded Cards (Replacing standard blocks with clean clickable pop-ups)
+    st.markdown("### 🔍 Deep-Dive Insights (Click to expand)")
     
-    with ic1:
-        st.markdown(f"""
-        <div class="insight-card">
-            <div class="insight-title">📉 Socioeconomic Disparity</div>
-            <p class="insight-desc">
-                Schools with lower poverty rates experience an aggregate admit rate of <b>{low_rate:.1f}%</b>, compared to <b>{high_rate:.1f}%</b> for high-poverty schools (≥{poverty_threshold}% FRPM).
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with ic2:
-        st.markdown(f"""
-        <div class="insight-card">
-            <div class="insight-title">🎯 Trendline Direction</div>
-            <p class="insight-desc">
-                The regression slope highlights how high school resource density and socioeconomic factors systematically correlate with higher or lower acceptance success into <b>{selected_campus}</b>.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+    with st.expander("📉 Socioeconomic Disparity Breakdown"):
+        st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.1f}%**, compared to **{high_rate:.1f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
+
+    with st.expander("🎯 Regression Trendline Analysis"):
+        st.write(f"The downward trendline slope highlights how high school resource density and economic factors systematically correlate with acceptance success into **{selected_campus}**.")
+
+    with st.expander("🏛️ Overall Policy Takeaway"):
+        st.write("Targeted intervention and holistic application reviews are vital for bridging the gap and ensuring high-poverty Bay Area schools have equal pathways into top-tier public universities.")
 
 with tab2:
     st.markdown("### School Performance Breakdowns")
