@@ -75,28 +75,9 @@ st.markdown("""
         margin: 0;
     }
     
-    /* High-Contrast Tab Styling for both Selected and Unselected States */
+    /* Hide default Streamlit tab list container so we replace it with interactive cards */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: transparent;
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #F2ECE4;
-        border-radius: 10px;
-        padding: 10px 20px;
-        color: #1A1614 !important;
-        border: 1px solid #E5DCD3;
-        font-weight: 700;
-    }
-    .stTabs [data-baseweb="tab"] p {
-        color: #1A1614 !important;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #1A1614 !important;
-        color: #FAF7F2 !important;
-    }
-    .stTabs [aria-selected="true"] p {
-        color: #FAF7F2 !important;
+        display: none !important;
     }
 
     /* Rounded Styling for Expander Dropdowns */
@@ -143,95 +124,116 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Interactive Tilting Category Cards Component matching your 3 specific tabs
-html_cards = """
+# Session state initialization for active tab selection
+if 'active_tab_index' not in st.session_state:
+    st.session_state.active_tab_index = 0
+
+# Interactive Tilting Category Cards Component controlling the native tabs row directly
+html_cards = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <style>
-        body {
+        body {{
             background-color: transparent;
             font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
             padding: 5px 0 15px 0;
-        }
-        .container {
+        }}
+        .container {{
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: flex-start;
             flex-wrap: wrap;
-        }
-        .category-card {
+        }}
+        .category-card {{
             background-color: #FFFFFF;
-            border: 1px solid #E8E0D5;
-            padding: 18px 16px;
-            border-radius: 14px;
+            border: 2px solid #E8E0D5;
+            padding: 16px 14px;
+            border-radius: 12px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
-            width: 260px;
+            flex: 1;
+            min-width: 250px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .category-card:hover {
+            gap: 14px;
+            transition: all 0.2s ease;
+        }}
+        .category-card.active {{
+            background-color: #1A1614;
+            border-color: #1A1614;
+        }}
+        .category-card:hover {{
             box-shadow: 0 6px 16px rgba(46, 39, 36, 0.08);
             transform: translateY(-2px);
-        }
-        .icon-wrapper {
+        }}
+        .icon-wrapper {{
             display: inline-block;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .icon {
-            font-size: 2rem;
+        }}
+        .icon {{
+            font-size: 1.8rem;
             display: block;
-        }
-        .category-text {
-            font-size: 0.95rem;
+        }}
+        .category-text {{
+            font-size: 0.9rem;
             font-weight: 700;
             color: #1A1614;
             text-align: left;
             line-height: 1.3;
-        }
+        }}
+        .category-card.active .category-text {{
+            color: #FAF7F2;
+        }}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="category-card" onclick="alert('Visual Analysis & Takeaways selected!')">
+        <div class="category-card {'active' if st.session_state.active_tab_index == 0 else ''}" onclick="setTabIndex(0)">
             <div class="icon-wrapper"><span class="icon">📊</span></div>
             <div class="category-text">Visual Analysis & Takeaways</div>
         </div>
-        <div class="category-card" onclick="alert('School Leaderboards selected!')">
+        <div class="category-card {'active' if st.session_state.active_tab_index == 1 else ''}" onclick="setTabIndex(1)">
             <div class="icon-wrapper"><span class="icon">📋</span></div>
             <div class="category-text">School Leaderboards</div>
         </div>
-        <div class="category-card" onclick="alert('Distribution Overview selected!')">
+        <div class="category-card {'active' if st.session_state.active_tab_index == 2 else ''}" onclick="setTabIndex(2)">
             <div class="icon-wrapper"><span class="icon">📈</span></div>
             <div class="category-text">Distribution Overview</div>
         </div>
     </div>
     <script>
+        function setTabIndex(index) {{
+            const data = {{ index: index }};
+            window.parent.postMessage({{ type: 'streamlit:setComponentValue', value: index }}, '*');
+        }}
+
         const cards = document.querySelectorAll('.category-card');
-        cards.forEach(card => {
+        cards.forEach(card => {{
             const iconWrapper = card.querySelector('.icon-wrapper');
-            card.addEventListener('mousemove', (e) => {
+            card.addEventListener('mousemove', (e) => {{
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const centerX = rect.width / 2;
                 const tiltAngle = ((x - centerX) / centerX) * 15;
-                iconWrapper.style.transform = `rotate(${tiltAngle}deg) scale(1.15)`;
-            });
-            card.addEventListener('mouseleave', () => {
+                iconWrapper.style.transform = `rotate(${{tiltAngle}}deg) scale(1.15)`;
+            }});
+            card.addEventListener('mouseleave', () => {{
                 iconWrapper.style.transform = 'rotate(0deg) scale(1)';
-            });
-        });
+            }});
+        }});
     </script>
 </body>
 </html>
 """
-components.html(html_cards, height=100)
+
+clicked_index = components.html(html_cards, height=95)
+if clicked_index is not None and clicked_index != st.session_state.active_tab_index:
+    st.session_state.active_tab_index = clicked_index
+    st.rerun()
 
 # 5. Sidebar Controls (Filtered to exclude years before 2014)
 st.sidebar.header("🎛️ Control Panel")
@@ -279,145 +281,149 @@ else:
 
     st.write("")
 
-    # 8. Main Tabs Layout
-    tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
+    # 8. Main Tabs Layout Controlled by Custom Interactive Header Cards
+    tab1, tab2, tab3 = st.tabs(["Visual Analysis & Takeaways", "School Leaderboards", "Distribution Overview"])
 
-    with tab1:
-        st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
-        
-        fig = px.scatter(
-            filtered,
-            x="frpm_pct_100",
-            y="admit_rate",
-            size="applicants",
-            color="frpm_pct_100",
-            color_continuous_scale=["#C8B89A", "#8C6D53", "#2C221E"],
-            hover_name="school_name" if "school_name" in filtered.columns else None,
-            hover_data=["applicants", "admits"],
-            labels={
-                "frpm_pct_100": "High School Poverty Rate (% FRPM)",
-                "admit_rate": "UC Admit Rate (%)",
-                "applicants": "Applicant Volume"
-            },
-            trendline="ols",
-            trendline_color_override="#1A1614"
-        )
+    current_tab = st.session_state.active_tab_index
 
-        fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="#F2ECE4",
-            font=dict(color="#1A1614", family="Inter", size=12),
-            coloraxis_showscale=False,
-            height=520,
-            margin=dict(t=20, b=20, l=20, r=20),
-            xaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
-            ),
-            yaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
+    if current_tab == 0:
+        with tab1:
+            st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
+            
+            fig = px.scatter(
+                filtered,
+                x="frpm_pct_100",
+                y="admit_rate",
+                size="applicants",
+                color="frpm_pct_100",
+                color_continuous_scale=["#C8B89A", "#8C6D53", "#2C221E"],
+                hover_name="school_name" if "school_name" in filtered.columns else None,
+                hover_data=["applicants", "admits"],
+                labels={
+                    "frpm_pct_100": "High School Poverty Rate (% FRPM)",
+                    "admit_rate": "UC Admit Rate (%)",
+                    "applicants": "Applicant Volume"
+                },
+                trendline="ols",
+                trendline_color_override="#1A1614"
             )
-        )
-        fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
-        st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
-        
-        with st.expander("📉 Socioeconomic Disparity Breakdown"):
-            st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.2f}%**, compared to **{high_rate:.2f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
-
-        with st.expander("🎯 Regression Trendline Analysis"):
-            st.write(f"The downward trendline slope highlights how high school resource density and economic factors systematically correlate with acceptance success into **{selected_campus}**.")
-
-        with st.expander("🏛️ Overall Policy Takeaway"):
-            st.write("Targeted intervention and holistic application reviews are vital for bridging the gap and ensuring high-poverty Bay Area schools have equal pathways into top-tier public universities.")
-
-    with tab2:
-        st.markdown("### School Performance Breakdowns")
-        
-        # User-friendly explanation for beginners
-        st.markdown("""
-        > **How to read these tables:** 
-        > * **School Name:** The high school evaluated.
-        > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
-        > * **Applicants:** Total number of students who applied to this UC campus from the school.
-        > * **Admits:** Total number of students accepted.
-        > * **Acceptance Rate (%):** The percentage of applicants who received an acceptance letter.
-        """)
-
-        col_left, col_right = st.columns(2)
-
-        display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
-        rename_map = {
-            "school_name": "School Name",
-            "frpm_pct_100": "Poverty Rate (%)",
-            "applicants": "Applicants",
-            "admits": "Admits",
-            "admit_rate": "Acceptance Rate (%)"
-        }
-
-        with col_left:
-            st.markdown("**Highest Poverty High Schools**")
-            top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
-            top_pov = top_pov.rename(columns=rename_map)
-            if "Poverty Rate (%)" in top_pov.columns:
-                top_pov["Poverty Rate (%)"] = top_pov["Poverty Rate (%)"].round(2)
-            if "Acceptance Rate (%)" in top_pov.columns:
-                top_pov["Acceptance Rate (%)"] = top_pov["Acceptance Rate (%)"].round(2)
-            st.dataframe(top_pov, hide_index=True, use_container_width=True)
-
-        with col_right:
-            st.markdown("**Lowest Poverty High Schools**")
-            low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
-            low_pov_table = low_pov_table.rename(columns=rename_map)
-            if "Poverty Rate (%)" in low_pov_table.columns:
-                low_pov_table["Poverty Rate (%)"] = low_pov_table["Poverty Rate (%)"].round(2)
-            if "Acceptance Rate (%)" in low_pov_table.columns:
-                low_pov_table["Acceptance Rate (%)"] = low_pov_table["Acceptance Rate (%)"].round(2)
-            st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
-
-    with tab3:
-        st.markdown("### Distribution of Poverty Across Bay Area High Schools")
-        fig_hist = px.histogram(
-            filtered,
-            x="frpm_pct_100",
-            nbins=25,
-            labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "count": "Number of High Schools"},
-            color_discrete_sequence=["#8C6D53"]
-        )
-        fig_hist.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="#F2ECE4",
-            font=dict(color="#1A1614", family="Inter", size=12),
-            height=400,
-            xaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
-            ),
-            yaxis=dict(
-                showgrid=True, 
-                gridcolor="#E5DCD3",
-                zeroline=True,
-                zerolinewidth=1.5,
-                zerolinecolor="#1A1614",
-                title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
-                tickfont=dict(size=12, color="#000000", family="Inter")
+            fig.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#F2ECE4",
+                font=dict(color="#1A1614", family="Inter", size=12),
+                coloraxis_showscale=False,
+                height=520,
+                margin=dict(t=20, b=20, l=20, r=20),
+                xaxis=dict(
+                    showgrid=True, 
+                    gridcolor="#E5DCD3",
+                    zeroline=True,
+                    zerolinewidth=1.5,
+                    zerolinecolor="#1A1614",
+                    title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                    tickfont=dict(size=12, color="#000000", family="Inter")
+                ),
+                yaxis=dict(
+                    showgrid=True, 
+                    gridcolor="#E5DCD3",
+                    zeroline=True,
+                    zerolinewidth=1.5,
+                    zerolinecolor="#1A1614",
+                    title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                    tickfont=dict(size=12, color="#000000", family="Inter")
+                )
             )
-        )
-        st.plotly_chart(fig_hist, use_container_width=True)
+            fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
+            
+            with st.expander("📉 Socioeconomic Disparity Breakdown"):
+                st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.2f}%**, compared to **{high_rate:.2f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
+
+            with st.expander("🎯 Regression Trendline Analysis"):
+                st.write(f"The downward trendline slope highlights how high school resource density and economic factors systematically correlate with acceptance success into **{selected_campus}**.")
+
+            with st.expander("🏛️ Overall Policy Takeaway"):
+                st.write("Targeted intervention and holistic application reviews are vital for bridging the gap and ensuring high-poverty Bay Area schools have equal pathways into top-tier public universities.")
+
+    elif current_tab == 1:
+        with tab2:
+            st.markdown("### School Performance Breakdowns")
+            
+            st.markdown("""
+            > **How to read these tables:** 
+            > * **School Name:** The high school evaluated.
+            > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
+            > * **Applicants:** Total number of students who applied to this UC campus from the school.
+            > * **Admits:** Total number of students accepted.
+            > * **Acceptance Rate (%):** The percentage of applicants who received an acceptance letter.
+            """)
+
+            col_left, col_right = st.columns(2)
+
+            display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
+            rename_map = {
+                "school_name": "School Name",
+                "frpm_pct_100": "Poverty Rate (%)",
+                "applicants": "Applicants",
+                "admits": "Admits",
+                "admit_rate": "Acceptance Rate (%)"
+            }
+
+            with col_left:
+                st.markdown("**Highest Poverty High Schools**")
+                top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
+                top_pov = top_pov.rename(columns=rename_map)
+                if "Poverty Rate (%)" in top_pov.columns:
+                    top_pov["Poverty Rate (%)"] = top_pov["Poverty Rate (%)"].round(2)
+                if "Acceptance Rate (%)" in top_pov.columns:
+                    top_pov["Acceptance Rate (%)"] = top_pov["Acceptance Rate (%)"].round(2)
+                st.dataframe(top_pov, hide_index=True, use_container_width=True)
+
+            with col_right:
+                st.markdown("**Lowest Poverty High Schools**")
+                low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
+                low_pov_table = low_pov_table.rename(columns=rename_map)
+                if "Poverty Rate (%)" in low_pov_table.columns:
+                    low_pov_table["Poverty Rate (%)"] = low_pov_table["Poverty Rate (%)"].round(2)
+                if "Acceptance Rate (%)" in low_pov_table.columns:
+                    low_pov_table["Acceptance Rate (%)"] = low_pov_table["Acceptance Rate (%)"].round(2)
+                st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
+
+    elif current_tab == 2:
+        with tab3:
+            st.markdown("### Distribution of Poverty Across Bay Area High Schools")
+            fig_hist = px.histogram(
+                filtered,
+                x="frpm_pct_100",
+                nbins=25,
+                labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "count": "Number of High Schools"},
+                color_discrete_sequence=["#8C6D53"]
+            )
+            fig_hist.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#F2ECE4",
+                font=dict(color="#1A1614", family="Inter", size=12),
+                height=400,
+                xaxis=dict(
+                    showgrid=True, 
+                    gridcolor="#E5DCD3",
+                    zeroline=True,
+                    zerolinewidth=1.5,
+                    zerolinecolor="#1A1614",
+                    title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                    tickfont=dict(size=12, color="#000000", family="Inter")
+                ),
+                yaxis=dict(
+                    showgrid=True, 
+                    gridcolor="#E5DCD3",
+                    zeroline=True,
+                    zerolinewidth=1.5,
+                    zerolinecolor="#1A1614",
+                    title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+                    tickfont=dict(size=12, color="#000000", family="Inter")
+                )
+            )
+            st.plotly_chart(fig_hist, use_container_width=True)
