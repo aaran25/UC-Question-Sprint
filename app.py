@@ -262,42 +262,31 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
-        lin_model = LinearRegression()
-        X_reg = filtered[["frpm_pct_100"]]
-        y_reg = filtered["admit_rate"]
-        lin_model.fit(X_reg, y_reg)
-        slope, intercept, r_sq = lin_model.coef_[0], lin_model.intercept_, lin_model.score(X_reg, y_reg)
-
+        # Summary Paragraphs for Scatter Plot
         st.markdown(f"""
         <div class="analysis-box">
-            <h4>📊 Regression Impact Breakdown & Plain-English Translation</h4>
-            <p style="color: #94A3B8; margin-bottom: 12px; font-size: 0.9rem;">
-                Mathematical breakdown mapping how high school poverty levels change admission outcomes at <b>{selected_campus}</b> ({selected_year}):
+            <h4>📊 Scatter Plot Analysis Summary</h4>
+            <p style="color: #94A3B8; font-size: 0.9rem; line-height: 1.6; margin-top: 8px;">
+                The scatter plot visualizes the relationship between high school poverty rates and UC admission rates for the selected campus. Each data point represents an individual high school, with marker sizes reflecting the total applicant volume from that school. The color gradient and the regression trendline highlight how admission outcomes shift across different socioeconomic tiers. Overall, this telemetry provides a quantitative overview of how geographical and economic context correlates with institutional access.
             </p>
         </div>
         """, unsafe_allow_html=True)
 
-        col_plain1, col_plain2 = st.columns(2)
-        with col_plain1:
-            st.markdown(f"""
-            <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); height: 100%;">
-                <b style="color: #38BDF8; font-size: 0.9rem;">STATISTICAL METRIC</b>
-                <ul style="color: #F8FAFC; padding-left: 18px; margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
-                    <li><b>Slope:</b> <code>{slope:.4f}</code></li>
-                    <li><b>Baseline Intercept:</b> <code>{intercept:.2f}%</code></li>
-                    <li><b>Variance Fit ($R^2$):</b> <code>{r_sq:.3f}</code></li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-        with col_plain2:
-            st.markdown(f"""
-            <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); height: 100%;">
-                <b style="color: #38BDF8; font-size: 0.9rem;">WHAT THIS MEANS FOR JUDGES</b>
-                <p style="color: #94A3B8; font-size: 0.85rem; margin-top: 10px; line-height: 1.5;">
-                    For every <b>10% increase</b> in a school's poverty rate, the admission rate shifts by <b>{(slope * 10):.2f}%</b>. The baseline shows what a wealthy school with 0% poverty expects to get.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+        # Histogram Section
+        st.markdown(f"### 📊 Distribution Topology Across Sectors")
+        fig_hist = px.histogram(filtered, x="frpm_pct_100", nbins=25, labels={"frpm_pct_100": "Poverty Rate (% FRPM)"}, color_discrete_sequence=["#38BDF8"])
+        fig_hist.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15, 23, 42, 0.4)", font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12), height=400)
+        st.plotly_chart(fig_hist, use_container_width=True)
+
+        # Summary Paragraphs for Histogram
+        st.markdown(f"""
+        <div class="analysis-box">
+            <h4>📈 Histogram Analysis Summary</h4>
+            <p style="color: #94A3B8; font-size: 0.9rem; line-height: 1.6; margin-top: 8px;">
+                The distribution histogram illustrates the frequency of high schools across various poverty rate brackets within the dataset. It maps out the broader demographic landscape of the applicant pool, showing whether schools tend to cluster in lower or higher poverty concentrations. This structural view helps establish the baseline representation of different educational sectors in the analysis.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
     with tab2:
         st.markdown("### ⚖️ Equity & Opportunity Gap Analysis")
@@ -332,10 +321,10 @@ else:
             st.dataframe(filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].rename(columns=rename_map), hide_index=True, use_container_width=True)
 
     with tab4:
-        st.markdown("### 📊 Distribution Topology Across Sectors")
-        fig_hist = px.histogram(filtered, x="frpm_pct_100", nbins=25, labels={"frpm_pct_100": "Poverty Rate (% FRPM)"}, color_discrete_sequence=["#38BDF8"])
-        fig_hist.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15, 23, 42, 0.4)", font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12), height=400)
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.markdown("### 📊 Demographic Spectrum")
+        fig_demo = px.histogram(filtered, x="frpm_pct_100", nbins=20, color_discrete_sequence=["#0284C7"])
+        fig_demo.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15, 23, 42, 0.4)", font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12), height=400)
+        st.plotly_chart(fig_demo, use_container_width=True)
 
     with tab5:
         st.markdown("### 🤖 Neural Admission Predictor Matrix")
