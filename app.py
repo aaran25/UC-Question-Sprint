@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 
 # 1. Page Configuration
 st.set_page_config(
@@ -26,7 +27,6 @@ st.markdown("""
         border-right: 1px solid #1E293B;
     }
     
-    /* Futuristic Metric Cards with Glow */
     div[data-testid="stMetric"] {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
         border: 1px solid rgba(56, 189, 248, 0.2);
@@ -65,7 +65,6 @@ st.markdown("""
         text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
     }
 
-    /* Utopian Sci-Fi Hero Container */
     .hero-container {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(6, 78, 59, 0.4) 100%), 
                     radial-gradient(circle at top right, rgba(56, 189, 248, 0.15), transparent 50%);
@@ -91,23 +90,15 @@ st.markdown("""
         margin: 0;
     }
 
-    /* Interactive Tilt Container Wrapper */
-    .tilt-card {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(56, 189, 248, 0.15);
+    .analysis-box {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        padding: 20px 24px;
         border-radius: 16px;
-        padding: 20px;
-        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, border-color 0.4s ease;
-        transform-style: preserve-3d;
-        perspective: 1000px;
-    }
-    .tilt-card:hover {
-        transform: translateY(-6px) rotateX(2deg) rotateY(-2deg);
-        border-color: rgba(56, 189, 248, 0.5);
-        box-shadow: 0 20px 35px -10px rgba(56, 189, 248, 0.25);
+        margin-top: 20px;
+        box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.1);
     }
 
-    /* Streamlit Tabs Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
         background-color: transparent;
@@ -118,10 +109,10 @@ st.markdown("""
         background-color: #0F172A;
         border-radius: 14px;
         border: 1px solid rgba(56, 189, 248, 0.2);
-        padding: 0 24px;
+        padding: 0 20px;
         color: #94A3B8 !important;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         transition: all 0.2s ease;
     }
     
@@ -199,17 +190,26 @@ else:
     low_rate = round((low_pov["admits"].sum() / low_pov["applicants"].sum() * 100), 2) if low_pov["applicants"].sum() > 0 else 0.00
     rate_diff = round(low_rate - high_rate, 2)
 
+    # Opportunity Gap Ratio calculation
+    opp_gap_ratio = round(low_rate / high_rate, 2) if high_rate > 0 else 0.00
+
     # 7. Metrics Row
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("🏛️ Active Node", selected_campus)
     col2.metric("📈 High Pov Yield (≥50%)", f"{high_rate:.2f}%")
     col3.metric("📉 Low Pov Yield (<50%)", f"{low_rate:.2f}%")
-    col4.metric("⚖️ Access Differential", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
+    col4.metric("⚖️ Opportunity Gap Ratio", f"{opp_gap_ratio}x", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
 
     st.write("")
 
-    # 8. Tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Visual Telemetry", "📋 Sector Leaderboards", "📈 Demographic Spectrum", "🤖 Neural Predictor Matrix"])
+    # 8. Tabs (Added Equity & Opportunity Gap Tab)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📊 Visual Telemetry", 
+        "⚖️ Equity & Opportunity Gap", 
+        "📋 Sector Leaderboards", 
+        "📈 Demographic Spectrum", 
+        "🤖 Neural Predictor Matrix"
+    ])
 
     with tab1:
         st.markdown(f"### 🔍 Telemetry Grid: Socioeconomic Impact vs. Success Rate ({selected_year})")
@@ -253,32 +253,85 @@ else:
         fig.update_traces(marker=dict(opacity=0.9, line=dict(width=1, color="#38BDF8")))
         st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("### 📉 Longitudinal Trajectory Vector")
-        if not filtered.empty:
-            filtered["poverty_bin"] = pd.cut(filtered["frpm_pct_100"], bins=10, labels=[f"{i*10}-{(i+1)*10}%" for i in range(10)])
-            trend_df = filtered.groupby("poverty_bin", observed=False)["admit_rate"].mean().reset_index()
-            
-            fig_line1 = px.line(
-                trend_df,
-                x="poverty_bin",
-                y="admit_rate",
-                markers=True,
-                labels={"poverty_bin": "Poverty Bracket (% FRPM)", "admit_rate": "Average Admit Rate (%)"},
-                color_discrete_sequence=["#38BDF8"]
-            )
-            fig_line1.update_layout(
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(15, 23, 42, 0.4)",
-                font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12),
-                height=350,
-                margin=dict(t=20, b=20, l=20, r=20),
-                xaxis=dict(showgrid=True, gridcolor="rgba(56, 189, 248, 0.1)", title_font=dict(size=13, weight="bold")),
-                yaxis=dict(showgrid=True, gridcolor="rgba(56, 189, 248, 0.1)", title_font=dict(size=13, weight="bold"))
-            )
-            fig_line1.update_traces(line=dict(width=3), marker=dict(size=8))
-            st.plotly_chart(fig_line1, use_container_width=True)
+        # Regression Impact Breakdown Module inside Visual Analysis
+        st.markdown("### 📉 Regression Impact Breakdown")
+        
+        lin_model = LinearRegression()
+        X_reg = filtered[["frpm_pct_100"]]
+        y_reg = filtered["admit_rate"]
+        lin_model.fit(X_reg, y_reg)
+        slope = lin_model.coef_[0]
+        intercept = lin_model.intercept_
+        r_sq = lin_model.score(X_reg, y_reg)
+
+        st.markdown(f"""
+        <div class="analysis-box">
+            <h4>📊 Statistical Linear Regression Telemetry</h4>
+            <p style="color: #94A3B8; margin-bottom: 10px;">
+                Calculated OLS regression mapping high school poverty concentration (<span style="color: #38BDF8;">% FRPM</span>) to institutional admission yield for <b>{selected_campus}</b> ({selected_year}):
+            </p>
+            <ul style="color: #F8FAFC; line-height: 1.6;">
+                <li><b>Regression Slope Coefficient:</b> <code>{slope:.4f}</code>% change in acceptance rate per 1% increase in school poverty concentration.</li>
+                <li><b>Baseline Intercept (0% Poverty):</b> <code>{intercept:.2f} %</code> predicted acceptance rate for completely affluent sectors.</li>
+                <li><b>Model Variance Fit ($R^2$):</b> <code>{r_sq:.3f}</code> (Indicates strength of socioeconomic correlation across sector nodes).</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
     with tab2:
+        st.markdown("### ⚖️ Equity & Opportunity Gap Analysis")
+        st.markdown("Evaluating structural educational access barriers by analyzing disparity multipliers across institutional boundaries.")
+
+        col_g1, col_g2 = st.columns(2)
+        
+        with col_g1:
+            st.markdown(f"""
+            <div class="analysis-box" style="height: 100%;">
+                <h4>🔍 Opportunity Gap Ratio</h4>
+                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">
+                    {opp_gap_ratio}x Multiplier
+                </p>
+                <p style="color: #94A3B8; line-height: 1.6;">
+                    Students attending low-poverty high schools (&lt;50% FRPM) experience an acceptance rate <b>{opp_gap_ratio} times higher</b> compared to peers at high-poverty institutions (≥50% FRPM) for <b>{selected_campus}</b>.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col_g2:
+            st.markdown(f"""
+            <div class="analysis-box" style="height: 100%;">
+                <h4>🌐 Institutional Equity Index</h4>
+                <p style="color: #94A3B8; line-height: 1.6; margin-top: 10px;">
+                    Absolute Admission Rate Delta: <b style="color: #F8FAFC;">{abs(rate_diff):.2f}%</b>
+                </p>
+                <p style="color: #94A3B8; line-height: 1.6;">
+                    This metric isolates systemic institutional access gaps. A higher delta reveals a widening opportunity disparity between socioeconomically disadvantaged and advantaged academic sectors.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("### 🏛️ Cross-Campus Equity Benchmarks")
+        
+        # Calculate summary metrics across all campuses for comparison
+        if "campus" in df.columns and "fall_term" in df.columns:
+            comp_df = df[df["fall_term"] == selected_year].dropna(subset=["frpm_pct_100", "admits", "applicants"])
+            if not comp_df.empty:
+                comp_df["admit_rate"] = (comp_df["admits"] / comp_df["applicants"]) * 100
+                campus_equity = []
+                for camp in comp_df["campus"].unique():
+                    c_data = comp_df[comp_df["campus"] == camp]
+                    c_high = c_data[c_data["frpm_pct_100"] >= 50]
+                    c_low = c_data[c_data["frpm_pct_100"] < 50]
+                    h_r = (c_high["admits"].sum() / c_high["applicants"].sum() * 100) if c_high["applicants"].sum() > 0 else 0
+                    l_r = (c_low["admits"].sum() / c_low["applicants"].sum() * 100) if c_low["applicants"].sum() > 0 else 0
+                    ratio = round(l_r / h_r, 2) if h_r > 0 else 0.0
+                    campus_equity.append({"Campus": camp, "Low-Pov Rate (%)": round(l_r, 2), "High-Pov Rate (%)": round(h_r, 2), "Opportunity Gap Ratio": ratio})
+                
+                eq_table = pd.DataFrame(campus_equity).sort_values(by="Opportunity Gap Ratio", ascending=False)
+                st.dataframe(eq_table, hide_index=True, use_container_width=True)
+
+    with tab3:
         st.markdown("### 📋 Sector Performance Indices")
         col_left, col_right = st.columns(2)
 
@@ -303,7 +356,7 @@ else:
             low_pov_table = low_pov_table.rename(columns=rename_map)
             st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
-    with tab3:
+    with tab4:
         st.markdown("### 📊 Distribution Topology Across Sectors")
         fig_hist = px.histogram(
             filtered,
@@ -322,7 +375,7 @@ else:
         )
         st.plotly_chart(fig_hist, use_container_width=True)
 
-    with tab4:
+    with tab5:
         st.markdown("### 🤖 Neural Admission Predictor Matrix")
         st.markdown("Simulate synthetic entrance vectors utilizing machine learning regression models trained on historical institutional telemetry.")
 
