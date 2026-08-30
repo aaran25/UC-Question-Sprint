@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & High-Contrast Typography Styling
+# 2. Creamy Aesthetic & High-Contrast Typography Styling (Fixed Metric Cutoffs)
 st.markdown("""
     <style>
     .stApp {
@@ -21,28 +21,41 @@ st.markdown("""
         background-color: #F2ECE4;
         border-right: 1px solid #E5DCD3;
     }
+    
+    /* Ensure metric cards have adequate height and no text clipping */
     div[data-testid="stMetric"] {
         background-color: #FFFFFF;
         border: 1px solid #E8E0D5;
-        padding: 20px;
+        padding: 16px 20px;
         border-radius: 14px;
         box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
+    
     h1, h2, h3, h4 {
         color: #1A1614 !important;
         font-weight: 700;
     }
+    
+    /* Responsive metric labels and values to prevent overflow/cutting off */
     [data-testid="stMetricLabel"] {
         color: #594D47 !important;
-        font-size: 0.85rem;
+        font-size: 0.8rem !important;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         font-weight: 600;
+        white-space: normal !important;
     }
     [data-testid="stMetricValue"] {
         color: #1A1614 !important;
+        font-size: 1.5rem !important;
         font-weight: 800;
+        white-space: nowrap;
     }
+
     .hero-container {
         background-color: #F2ECE4;
         padding: 24px 30px;
@@ -153,12 +166,12 @@ high_rate = (high_pov["admits"].sum() / high_pov["applicants"].sum() * 100) if h
 low_rate = (low_pov["admits"].sum() / low_pov["applicants"].sum() * 100) if low_pov["applicants"].sum() > 0 else 0
 rate_diff = low_rate - high_rate
 
-# 7. Metrics Row
+# 7. Metrics Row (Clean labels to prevent wrapping/clipping issues)
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Selected Campus", selected_campus)
-col2.metric("High Poverty Admit Rate", f"{high_rate:.1f}%", help=f"High schools with ≥{poverty_threshold}% FRPM")
-col3.metric("Low Poverty Admit Rate", f"{low_rate:.1f}%", help=f"High schools with <{poverty_threshold}% FRPM")
-col4.metric("Admit Rate Gap", f"{rate_diff:+.1f}%", delta=f"{rate_diff:+.1f}% Advantage", delta_color="normal" if rate_diff > 0 else "inverse")
+col1.metric("Campus", selected_campus)
+col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.1f}%")
+col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.1f}%")
+col4.metric("Admit Rate Gap", f"{rate_diff:+.1f}%", delta=f"{rate_diff:+.1f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
 
 st.write("")
 
