@@ -322,7 +322,9 @@ else:
 
         col_pred1, col_pred2 = st.columns(2)
         
-        all_schools = sorted(df["school_name"].dropna().unique()) if "school_name" in df.columns else []
+        # Check standard column name variants for high schools in CSV
+        school_col_name = "school_name" if "school_name" in df.columns else ("high_schools" if "high_schools" in df.columns else df.columns[0])
+        all_schools = sorted(df[school_col_name].dropna().unique()) if school_col_name in df.columns else []
         
         with col_pred1:
             st.markdown("##### 🏫 High School Selection")
@@ -344,7 +346,7 @@ else:
             input_income = st.number_input("Enter annual household income ($):", min_value=10000, max_value=500000, value=85000, step=5000, label_visibility="collapsed")
             
             # Safe match lookup with error handling
-            school_match_row = df[df["school_name"] == selected_school_pred] if selected_school_pred else pd.DataFrame()
+            school_match_row = df[df[school_col_name] == selected_school_pred] if selected_school_pred else pd.DataFrame()
             
             if not school_match_row.empty and "frpm_pct_100" in school_match_row.columns:
                 default_frpm = float(school_match_row["frpm_pct_100"].values[0])
