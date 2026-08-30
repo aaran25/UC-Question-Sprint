@@ -215,7 +215,7 @@ else:
             size="applicants",
             color="frpm_pct_100",
             color_continuous_scale=["#93C5FD", "#3B82F6", "#1D4ED8", "#1E3A8A"],
-            hover_name="school_name" if "school_name" in filtered.columns else None,
+            hover_name="high_school" if "high_school" in filtered.columns else None,
             hover_data=["applicants", "admits"],
             labels={
                 "frpm_pct_100": "High School Poverty Rate (% FRPM)",
@@ -276,9 +276,9 @@ else:
         st.markdown("### School Performance Breakdowns")
         col_left, col_right = st.columns(2)
 
-        display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
+        display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
         rename_map = {
-            "school_name": "School Name",
+            "high_school": "School Name",
             "frpm_pct_100": "Poverty Rate (%)",
             "applicants": "Applicants",
             "admits": "Admits",
@@ -322,9 +322,8 @@ else:
 
         col_pred1, col_pred2 = st.columns(2)
         
-        # Check standard column name variants for high schools in CSV
-        school_col_name = "school_name" if "school_name" in df.columns else ("high_schools" if "high_schools" in df.columns else df.columns[0])
-        all_schools = sorted(df[school_col_name].dropna().unique()) if school_col_name in df.columns else []
+        # Explicitly pull high schools from the 'high_school' column
+        all_schools = sorted(df["high_school"].dropna().unique()) if "high_school" in df.columns else []
         
         with col_pred1:
             st.markdown("##### 🏫 High School Selection")
@@ -345,8 +344,8 @@ else:
             st.markdown("##### 💰 Estimated Household Income")
             input_income = st.number_input("Enter annual household income ($):", min_value=10000, max_value=500000, value=85000, step=5000, label_visibility="collapsed")
             
-            # Safe match lookup with error handling
-            school_match_row = df[df[school_col_name] == selected_school_pred] if selected_school_pred else pd.DataFrame()
+            # Safe match lookup using 'high_school' column
+            school_match_row = df[df["high_school"] == selected_school_pred] if selected_school_pred else pd.DataFrame()
             
             if not school_match_row.empty and "frpm_pct_100" in school_match_row.columns:
                 default_frpm = float(school_match_row["frpm_pct_100"].values[0])
