@@ -292,6 +292,12 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
+        st.write("")
+        st.markdown("#### ⚡ Outlier Schools: High Poverty, High Admission Rates")
+        outlier_display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in resilient_schools.columns]
+        outlier_rename = {"high_school": "School Name", "frpm_pct_100": "Poverty Rate (%)", "applicants": "Applicants", "admits": "Admits", "admit_rate": "Admission Rate (%)"}
+        st.dataframe(resilient_schools[outlier_display_cols].rename(columns=outlier_rename), hide_index=True, use_container_width=True)
+
     with tab3:
         st.markdown("### 📋 Sector Performance Indices")
         col_left, col_right = st.columns(2)
