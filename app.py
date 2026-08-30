@@ -49,6 +49,18 @@ st.markdown("""
         color: #2E2724 !important;
         font-weight: 700;
     }
+
+    /* Explanatory Text Box */
+    .project-description {
+        background-color: #F2ECE4;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #E5DCD3;
+        margin-bottom: 25px;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #4A3B32;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -67,24 +79,29 @@ def load_data():
 
 df = load_data()
 
-# 4. Header Section
-st.title("📊 UC Admissions & High School Socioeconomics")
-st.markdown("Exploring the relationship between high school poverty rates (`FRPM %`) and UC admission outcomes across Bay Area schools.")
+# 4. Main Question Title & Context Box
+st.title("How does student poverty concentration (FRPM) impact UC admission outcomes across Bay Area high schools?")
+
+st.markdown("""
+<div class="project-description">
+<b>Project Overview:</b> This dashboard explores educational equity across the Bay Area by analyzing how socioeconomic factors shape college access. 
+It investigates whether high schools with higher concentrations of students qualifying for Free or Reduced-Price Meals (FRPM) face disparities 
+in University of California (UC) acceptance rates, application volumes, and overall institutional access compared to more affluent schools.
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
 # 5. Sidebar Controls
 st.sidebar.header("🎛️ Filter Controls")
 
-# Campus Filter (Defaults to Universitywide if present)
 campuses = sorted(df["campus"].dropna().unique())
 default_campus_idx = campuses.index("Universitywide") if "Universitywide" in campuses else 0
 selected_campus = st.sidebar.selectbox("Select UC Campus", campuses, index=default_campus_idx)
 
-# Year Filter
 years = sorted(df["fall_term"].dropna().unique(), reverse=True)
 selected_year = st.sidebar.selectbox("Select Fall Term", years, index=0)
 
-# Poverty Threshold Slider
 poverty_threshold = st.sidebar.slider("High Poverty Threshold (% FRPM)", min_value=10, max_value=90, value=50, step=5)
 
 # 6. Data Filtering
@@ -93,10 +110,8 @@ filtered = df[
     (df["campus"] == selected_campus)
 ].dropna(subset=["frpm_pct_100", "admits", "applicants"])
 
-# Calculate Admit Rate %
 filtered["admit_rate"] = (filtered["admits"] / filtered["applicants"]) * 100
 
-# Group by Threshold
 high_pov = filtered[filtered["frpm_pct_100"] >= poverty_threshold]
 low_pov = filtered[filtered["frpm_pct_100"] < poverty_threshold]
 
@@ -114,7 +129,7 @@ m4.metric("Admit Rate Gap", f"{rate_diff:+.1f}%", delta=f"{rate_diff:+.1f}% Adva
 
 st.write("")
 
-# 8. Plotly Chart (Styled for Cream Theme)
+# 8. Plotly Scatter Plot
 hover_col = "school_name" if "school_name" in filtered.columns else None
 
 fig = px.scatter(
