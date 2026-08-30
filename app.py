@@ -150,7 +150,6 @@ campuses = sorted(df["campus"].dropna().unique()) if "campus" in df.columns else
 default_campus_idx = campuses.index("Universitywide") if "Universitywide" in campuses else 0
 selected_campus = st.sidebar.selectbox("Select UC Campus", campuses, index=default_campus_idx)
 
-# Filter years to only include 2014 and onward
 if "fall_term" in df.columns:
     all_years = sorted(df["fall_term"].dropna().unique(), reverse=True)
     years = [y for y in all_years if y >= 2014]
@@ -255,26 +254,46 @@ else:
 
     with tab2:
         st.markdown("### School Performance Breakdowns")
+        
+        # User-friendly explanation for beginners
+        st.markdown("""
+        > **How to read these tables:** 
+        > * **School Name:** The high school evaluated.
+        > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
+        > * **Applicants:** Total number of students who applied to this UC campus from the school.
+        > * **Admits:** Total number of students accepted.
+        > * **Acceptance Rate (%):** The percentage of applicants who received an acceptance letter.
+        """)
+
         col_left, col_right = st.columns(2)
 
         display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
+        rename_map = {
+            "school_name": "School Name",
+            "frpm_pct_100": "Poverty Rate (%)",
+            "applicants": "Applicants",
+            "admits": "Admits",
+            "admit_rate": "Acceptance Rate (%)"
+        }
 
         with col_left:
             st.markdown("**Highest Poverty High Schools**")
             top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
-            if "frpm_pct_100" in top_pov.columns:
-                top_pov["frpm_pct_100"] = top_pov["frpm_pct_100"].round(2)
-            if "admit_rate" in top_pov.columns:
-                top_pov["admit_rate"] = top_pov["admit_rate"].round(2)
+            top_pov = top_pov.rename(columns=rename_map)
+            if "Poverty Rate (%)" in top_pov.columns:
+                top_pov["Poverty Rate (%)"] = top_pov["Poverty Rate (%)"].round(2)
+            if "Acceptance Rate (%)" in top_pov.columns:
+                top_pov["Acceptance Rate (%)"] = top_pov["Acceptance Rate (%)"].round(2)
             st.dataframe(top_pov, hide_index=True, use_container_width=True)
 
         with col_right:
             st.markdown("**Lowest Poverty High Schools**")
             low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
-            if "frpm_pct_100" in low_pov_table.columns:
-                low_pov_table["frpm_pct_100"] = low_pov_table["frpm_pct_100"].round(2)
-            if "admit_rate" in low_pov_table.columns:
-                low_pov_table["admit_rate"] = low_pov_table["admit_rate"].round(2)
+            low_pov_table = low_pov_table.rename(columns=rename_map)
+            if "Poverty Rate (%)" in low_pov_table.columns:
+                low_pov_table["Poverty Rate (%)"] = low_pov_table["Poverty Rate (%)"].round(2)
+            if "Acceptance Rate (%)" in low_pov_table.columns:
+                low_pov_table["Acceptance Rate (%)"] = low_pov_table["Acceptance Rate (%)"].round(2)
             st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
     with tab3:
