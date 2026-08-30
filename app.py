@@ -189,4 +189,197 @@ else:
     high_pov = filtered[filtered["frpm_pct_100"] >= poverty_threshold]
     low_pov = filtered[filtered["frpm_pct_100"] < poverty_threshold]
 
-    high_rate = round
+    high_rate = round((high_pov["admits"].sum() / high_pov["applicants"].sum() * 100), 2) if high_pov["applicants"].sum() > 0 else 0.00
+    low_rate = round((low_pov["admits"].sum() / low_pov["applicants"].sum() * 100), 2) if low_pov["applicants"].sum() > 0 else 0.00
+    rate_diff = round(low_rate - high_rate, 2)
+
+    # 7. Metrics Row
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Campus", selected_campus)
+    col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.2f}%")
+    col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.2f}%")
+    col4.metric("Admit Rate Gap", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
+
+    st.write("")
+
+    # 8. Tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Visual Analysis", "📋 School Leaderboards", "📈 Distribution Overview", "🤖 AI Admission Predictor"])
+
+    with tab1:
+        st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
+        
+        fig = px.scatter(
+            filtered,
+            x="frpm_pct_100",
+            y="admit_rate",
+            size="applicants",
+            color="frpm_pct_100",
+            color_continuous_scale=["#93C5FD", "#3B82F6", "#1D4ED8", "#1E3A8A"],
+            hover_name="school_name" if "school_name" in filtered.columns else None,
+            hover_data=["applicants", "admits"],
+            labels={
+                "frpm_pct_100": "High School Poverty Rate (% FRPM)",
+                "admit_rate": "UC Admit Rate (%)",
+                "applicants": "Applicant Volume"
+            },
+            trendline="ols",
+            trendline_color_override="#EF4444"
+        )
+
+        fig.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#FFFFFF",
+            font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
+            coloraxis_showscale=False,
+            height=500,
+            margin=dict(t=20, b=20, l=20, r=20),
+            xaxis=dict(
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
+                tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
+            ),
+            yaxis=dict(
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
+                tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
+            )
+        )
+        fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FFFFFF")))
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("### 📉 Trend Line: Average Admission Rate Across Poverty Brackets")
+        if not filtered.empty:
+            filtered["poverty_bin"] = pd.cut(filtered["frpm_pct_100"], bins=10, labels=[f"{i*10}-{(i+1)*10}%" for i in range(10)])
+            trend_df = filtered.groupby("poverty_bin", observed=False)["admit_rate"].mean().reset_index()
+            
+            fig_line1 = px.line(
+                trend_df,
+                x="poverty_bin",
+                y="admit_rate",
+                markers=True,
+                labels={"poverty_bin": "Poverty Bracket (% FRPM)", "admit_rate": "Average Admit Rate (%)"},
+                color_discrete_sequence=["#3B82F6"]
+            )
+            fig_line1.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="#FFFFFF",
+                font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
+                height=350,
+                margin=dict(t=20, b=20, l=20, r=20),
+                xaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold")),
+                yaxis=dict(showgrid=True, gridcolor="#F1F5F9", title_font=dict(size=13, weight="bold"))
+            )
+            fig_line1.update_traces(line=dict(width=3), marker=dict(size=8))
+            st.plotly_chart(fig_line1, use_container_width=True)
+
+    with tab2:
+        st.markdown("### School Performance Breakdowns")
+        col_left, col_right = st.columns(2)
+
+        display_cols = [col for col in ["school_name", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
+        rename_map = {
+            "school_name": "School Name",
+            "frpm_pct_100": "Poverty Rate (%)",
+            "applicants": "Applicants",
+            "admits": "Admits",
+            "admit_rate": "Acceptance Rate (%)"
+        }
+
+        with col_left:
+            st.markdown("**Highest Poverty High Schools**")
+            top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
+            top_pov = top_pov.rename(columns=rename_map)
+            st.dataframe(top_pov, hide_index=True, use_container_width=True)
+
+        with col_right:
+            st.markdown("**Lowest Poverty High Schools**")
+            low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
+            low_pov_table = low_pov_table.rename(columns=rename_map)
+            st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
+
+    with tab3:
+        st.markdown("### Distribution of Poverty Across Bay Area High Schools")
+        fig_hist = px.histogram(
+            filtered,
+            x="frpm_pct_100",
+            nbins=25,
+            labels={"frpm_pct_100": "Poverty Rate (% FRPM)", "count": "Number of High Schools"},
+            color_discrete_sequence=["#3B82F6"]
+        )
+        fig_hist.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="#FFFFFF",
+            font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
+            height=400,
+            xaxis=dict(showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1"),
+            yaxis=dict(showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1")
+        )
+        st.plotly_chart(fig_hist, use_container_width=True)
+
+    with tab4:
+        st.markdown("### 🤖 Advanced Machine Learning Admission Predictor")
+        st.markdown("Type to search or select your high school name from the dataset, pick your target UC campus, major, and economic details to calculate your predictive admission percentage.")
+
+        col_pred1, col_pred2 = st.columns(2)
+        
+        all_schools = sorted(df["school_name"].dropna().unique()) if "school_name" in df.columns else []
+        
+        with col_pred1:
+            # Native Streamlit selectbox with built-in type-to-search functionality
+            selected_school_pred = st.selectbox(
+                "Select or Type High School Name:", 
+                options=all_schools,
+                index=0 if all_schools else None,
+                placeholder="Type to search high school..."
+            )
+            
+            target_uc_college = st.selectbox("Target UC College to Apply To:", campuses)
+            input_major = st.selectbox("Intended Major Field", ["STEM / Engineering", "Computer Science", "Biological Sciences", "Social Sciences", "Humanities / Arts", "Business / Economics"])
+
+        with col_pred2:
+            input_income = st.number_input("Estimated Household Income ($)", min_value=10000, max_value=500000, value=85000, step=5000)
+            
+            # Safe match lookup with error handling
+            school_match_row = df[df["school_name"] == selected_school_pred] if selected_school_pred else pd.DataFrame()
+            
+            if not school_match_row.empty and "frpm_pct_100" in school_match_row.columns:
+                default_frpm = float(school_match_row["frpm_pct_100"].values[0])
+            else:
+                default_frpm = 35.0
+
+            if not school_match_row.empty and "applicants" in school_match_row.columns:
+                default_app_vol = int(school_match_row["applicants"].values[0])
+            else:
+                default_app_vol = 50
+
+            input_frpm = st.slider("High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=default_frpm, step=1.0)
+            input_applicants = st.number_input("Cohort Applicant Volume", min_value=1, max_value=500, value=default_app_vol)
+
+        major_weights = {
+            "Computer Science": 0.6,
+            "STEM / Engineering": 0.75,
+            "Biological Sciences": 0.85,
+            "Business / Economics": 0.85,
+            "Social Sciences": 1.0,
+            "Humanities / Arts": 1.1
+        }
+        major_multiplier = major_weights.get(input_major, 1.0)
+
+        prediction_target_data = df[df["campus"] == target_uc_college].dropna(subset=["frpm_pct_100", "applicants", "admit_rate"])
+        
+        if len(prediction_target_data) > 10:
+            X = prediction_target_data[["frpm_pct_100", "applicants"]]
+            y = prediction_target_data["admit_rate"]
+            
+            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            model.fit(X, y)
+            
+            base_prediction = model.predict([[input_frpm, input_applicants]])[0]
+            final_prediction = base_prediction * major_multiplier
+            
+            st.write("")
+            st.markdown("#### Predicted Outcome:")
+            st.metric(label=f"Expected Admit Rate for {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_prediction)):.2f}%")
+            st.info(f"💡 **Simulator Logic:** Evaluates historical trends for **{target_uc_college}** given **{selected_school_pred}'s** poverty profile, adjusted for the competitiveness of **{input_major}**.")
+        else:
+            st.warning(f"Not enough data points available for **{target_uc_college}** to run the model.")
