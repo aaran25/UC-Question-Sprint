@@ -288,8 +288,7 @@ else:
         st.markdown("### School Performance Breakdowns")
         
         st.markdown("""
-        > **How to read these tables:** 
-        > * **School Name:** The high school evaluated.
+        > **How to read these tables:** > * **School Name:** The high school evaluated.
         > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
         > * **Applicants:** Total number of students who applied to this UC campus from the school.
         > * **Admits:** Total number of students accepted.
@@ -369,7 +368,7 @@ else:
             font=dict(color="#0F172A", family="Plus Jakarta Sans", size=12),
             height=400,
             xaxis=dict(
-                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
+                showgrid=True, gridcolor="#F1F5F9", zeroline=True, zerolinewidth=1.5, zerolinecolor="#CBD5E1",
                 title_font=dict(size=13, color="#0F172A", family="Plus Jakarta Sans", weight="bold"),
                 tickfont=dict(size=12, color="#475569", family="Plus Jakarta Sans")
             ),
