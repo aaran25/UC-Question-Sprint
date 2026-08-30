@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & High-Contrast Tab Styling
+# 2. Creamy Aesthetic & High-Contrast Tab & Typography Styling
 st.markdown("""
     <style>
     .stApp {
@@ -74,7 +74,7 @@ st.markdown("""
         margin: 0;
     }
     
-    /* Clean Tab Styling with Explicit Text Contrast */
+    /* High-Contrast Tab Styling for both Selected and Unselected States */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
         background-color: transparent;
@@ -83,9 +83,12 @@ st.markdown("""
         background-color: #F2ECE4;
         border-radius: 10px;
         padding: 10px 20px;
-        color: #2C221E !important;
+        color: #1A1614 !important;
         border: 1px solid #E5DCD3;
         font-weight: 700;
+    }
+    .stTabs [data-baseweb="tab"] p {
+        color: #1A1614 !important;
     }
     .stTabs [aria-selected="true"] {
         background-color: #1A1614 !important;
@@ -158,21 +161,22 @@ filtered = df[
     (df["campus"] == selected_campus)
 ].dropna(subset=["frpm_pct_100", "admits", "applicants"]) if "fall_term" in df.columns and "campus" in df.columns else df.copy()
 
-filtered["admit_rate"] = (filtered["admits"] / filtered["applicants"]) * 100
+filtered["admit_rate"] = ((filtered["admits"] / filtered["applicants"]) * 100).round(2)
+filtered["frpm_pct_100"] = filtered["frpm_pct_100"].round(2)
 
 high_pov = filtered[filtered["frpm_pct_100"] >= poverty_threshold]
 low_pov = filtered[filtered["frpm_pct_100"] < poverty_threshold]
 
-high_rate = (high_pov["admits"].sum() / high_pov["applicants"].sum() * 100) if high_pov["applicants"].sum() > 0 else 0
-low_rate = (low_pov["admits"].sum() / low_pov["applicants"].sum() * 100) if low_pov["applicants"].sum() > 0 else 0
-rate_diff = low_rate - high_rate
+high_rate = round((high_pov["admits"].sum() / high_pov["applicants"].sum() * 100), 2) if high_pov["applicants"].sum() > 0 else 0.00
+low_rate = round((low_pov["admits"].sum() / low_pov["applicants"].sum() * 100), 2) if low_pov["applicants"].sum() > 0 else 0.00
+rate_diff = round(low_rate - high_rate, 2)
 
 # 7. Metrics Row
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Campus", selected_campus)
-col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.1f}%")
-col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.1f}%")
-col4.metric("Admit Rate Gap", f"{rate_diff:+.1f}%", delta=f"{rate_diff:+.1f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
+col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.2f}%")
+col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.2f}%")
+col4.metric("Admit Rate Gap", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
 
 st.write("")
 
@@ -210,14 +214,20 @@ with tab1:
         xaxis=dict(
             showgrid=True, 
             gridcolor="#E5DCD3",
-            title_font=dict(size=14, color="#1A1614", family="Inter"),
-            tickfont=dict(size=12, color="#1A1614", family="Inter")
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
         ),
         yaxis=dict(
             showgrid=True, 
             gridcolor="#E5DCD3",
-            title_font=dict(size=14, color="#1A1614", family="Inter"),
-            tickfont=dict(size=12, color="#1A1614", family="Inter")
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
         )
     )
     fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
@@ -226,7 +236,7 @@ with tab1:
     st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
     
     with st.expander("📉 Socioeconomic Disparity Breakdown"):
-        st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.1f}%**, compared to **{high_rate:.1f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
+        st.write(f"Schools with lower poverty rates experience an aggregate admit rate of **{low_rate:.2f}%**, compared to **{high_rate:.2f}%** for high-poverty schools (≥{poverty_threshold}% FRPM). This exhibits a clear structural gap in college access across different economic lines.")
 
     with st.expander("🎯 Regression Trendline Analysis"):
         st.write(f"The downward trendline slope highlights how high school resource density and economic factors systematically correlate with acceptance success into **{selected_campus}**.")
@@ -242,12 +252,20 @@ with tab2:
 
     with col_left:
         st.markdown("**Highest Poverty High Schools**")
-        top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols]
+        top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
+        if "frpm_pct_100" in top_pov.columns:
+            top_pov["frpm_pct_100"] = top_pov["frpm_pct_100"].round(2)
+        if "admit_rate" in top_pov.columns:
+            top_pov["admit_rate"] = top_pov["admit_rate"].round(2)
         st.dataframe(top_pov, hide_index=True, use_container_width=True)
 
     with col_right:
         st.markdown("**Lowest Poverty High Schools**")
-        low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols]
+        low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
+        if "frpm_pct_100" in low_pov_table.columns:
+            low_pov_table["frpm_pct_100"] = low_pov_table["frpm_pct_100"].round(2)
+        if "admit_rate" in low_pov_table.columns:
+            low_pov_table["admit_rate"] = low_pov_table["admit_rate"].round(2)
         st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
 with tab3:
@@ -267,14 +285,20 @@ with tab3:
         xaxis=dict(
             showgrid=True, 
             gridcolor="#E5DCD3",
-            title_font=dict(size=14, color="#1A1614", family="Inter"),
-            tickfont=dict(size=12, color="#1A1614", family="Inter")
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
         ),
         yaxis=dict(
             showgrid=True, 
             gridcolor="#E5DCD3",
-            title_font=dict(size=14, color="#1A1614", family="Inter"),
-            tickfont=dict(size=12, color="#1A1614", family="Inter")
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
         )
     )
     st.plotly_chart(fig_hist, use_container_width=True)
