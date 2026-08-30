@@ -172,15 +172,10 @@ else:
 
 selected_year = st.sidebar.selectbox("📅 Temporal Cycle (Fall Term)", years, index=0)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("##### 🔍 Telemetry Filters")
-min_applicants = st.sidebar.slider("Min Applicant Volume", 1, 50, 5, 5)
-
 # 6. Data Filtering & Empty Check
 filtered = df[
     (df["fall_term"] == selected_year) & 
-    (df["campus"] == selected_campus) &
-    (df["applicants"] >= min_applicants)
+    (df["campus"] == selected_campus)
 ].dropna(subset=["frpm_pct_100", "admits", "applicants"]) if "fall_term" in df.columns and "campus" in df.columns else df.copy()
 
 if filtered.empty:
@@ -197,7 +192,6 @@ else:
     rate_diff = round(low_rate - high_rate, 2)
     opp_gap_ratio = round(low_rate / high_rate, 2) if high_rate > 0 else 0.00
 
-    # Calculate global stats for verification
     valid_corr = filtered.dropna(subset=["frpm_pct_100", "admit_rate"])
     r_val, p_val = stats.pearsonr(valid_corr["frpm_pct_100"], valid_corr["admit_rate"]) if len(valid_corr) > 5 else (0.0, 1.0)
 
@@ -210,13 +204,14 @@ else:
 
     st.write("")
 
-    # 8. Tabs Configuration (Mapping tab removed)
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    # 8. Tabs Configuration (Added Tab 6 for Opportunities)
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📊 Visual Telemetry", 
         "⚖️ Equity & Opportunity Gap", 
         "📋 Sector Leaderboards", 
         "📈 Demographic Spectrum", 
-        "🤖 Neural Predictor Matrix"
+        "🤖 Neural Predictor Matrix",
+        "🎯 Opportunity & Action Plan"
     ])
 
     with tab1:
@@ -267,7 +262,6 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
-        # Regression Impact Breakdown with Plain-English Explanations using native Streamlit columns
         lin_model = LinearRegression()
         X_reg = filtered[["frpm_pct_100"]]
         y_reg = filtered["admit_rate"]
@@ -284,7 +278,6 @@ else:
         """, unsafe_allow_html=True)
 
         col_plain1, col_plain2 = st.columns(2)
-        
         with col_plain1:
             st.markdown(f"""
             <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); height: 100%;">
@@ -296,13 +289,12 @@ else:
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-            
         with col_plain2:
             st.markdown(f"""
             <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); height: 100%;">
                 <b style="color: #38BDF8; font-size: 0.9rem;">WHAT THIS MEANS FOR JUDGES</b>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-top: 10px; line-height: 1.5;">
-                    For every <b>10% increase</b> in a school's poverty rate, the admission rate shifts by <b>{(slope * 10):.2f}%</b>. The baseline shows what a wealthy school with 0% poverty expects to get, proving a clear structural penalty tied to geography and income.
+                    For every <b>10% increase</b> in a school's poverty rate, the admission rate shifts by <b>{(slope * 10):.2f}%</b>. The baseline shows what a wealthy school with 0% poverty expects to get.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -310,30 +302,20 @@ else:
     with tab2:
         st.markdown("### ⚖️ Equity & Opportunity Gap Analysis")
         col_g1, col_g2 = st.columns(2)
-        
         with col_g1:
             st.markdown(f"""
             <div class="analysis-box" style="height: 100%;">
                 <h4>🔍 Opportunity Gap Ratio</h4>
-                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">
-                    {opp_gap_ratio}x Multiplier
-                </p>
-                <p style="color: #94A3B8; line-height: 1.6;">
-                    Students attending low-poverty high schools experience an admission rate <b>{opp_gap_ratio} times higher</b> than peers at high-poverty institutions for <b>{selected_campus}</b>.
-                </p>
+                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">{opp_gap_ratio}x Multiplier</p>
+                <p style="color: #94A3B8; line-height: 1.6;">Students attending low-poverty high schools experience an admission rate <b>{opp_gap_ratio} times higher</b> than peers at high-poverty institutions for <b>{selected_campus}</b>.</p>
             </div>
             """, unsafe_allow_html=True)
-
         with col_g2:
             st.markdown(f"""
             <div class="analysis-box" style="height: 100%;">
                 <h4>🌐 Institutional Disparity Delta</h4>
-                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">
-                    {abs(rate_diff):.2f}% Gap
-                </p>
-                <p style="color: #94A3B8; line-height: 1.6;">
-                    Absolute percentage point variance separating low-need vs high-need high school applicant cohorts.
-                </p>
+                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">{abs(rate_diff):.2f}% Gap</p>
+                <p style="color: #94A3B8; line-height: 1.6;">Absolute percentage point variance separating low-need vs high-need high school applicant cohorts.</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -342,11 +324,9 @@ else:
         col_left, col_right = st.columns(2)
         display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
         rename_map = {"high_school": "School Name", "frpm_pct_100": "Poverty Rate (%)", "applicants": "Applicants", "admits": "Admits", "admit_rate": "Admission Rate (%)"}
-
         with col_left:
             st.markdown("**🔴 High Vulnerability Sectors**")
             st.dataframe(filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].rename(columns=rename_map), hide_index=True, use_container_width=True)
-
         with col_right:
             st.markdown("**🟢 Low Vulnerability Sectors**")
             st.dataframe(filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].rename(columns=rename_map), hide_index=True, use_container_width=True)
@@ -384,3 +364,44 @@ else:
             
             st.write("")
             st.metric(label=f"Predicted Acceptance Probability — {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_pred)):.2f}%")
+
+    with tab6:
+        st.markdown("### 🎯 Local Opportunity & Strategic Action Plan")
+        st.markdown("Based on your selected high school profile and institutional parameters, here is a customized roadmap to strengthen your extracurricular and academic portfolio:")
+        
+        # Pull high school context safely
+        active_school = locals().get('selected_school_pred', 'Your School')
+        school_row = df[df["high_school"] == active_school] if 'active_school' in locals() and not df.empty else pd.DataFrame()
+        school_poverty = float(school_row["frpm_pct_100"].values[0]) if not school_row.empty and "frpm_pct_100" in school_row.columns else 30.0
+
+        col_op1, col_op2 = st.columns(2)
+        
+        with col_op1:
+            st.markdown(f"""
+            <div class="analysis-box">
+                <h4>🤝 Community & Leadership Builder</h4>
+                <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 10px;">
+                    Since your school has an FRPM poverty concentration index of <b>{school_poverty:.1f}%</b>, admissions teams evaluate your achievements within your local context (Comprehensive Review).
+                </p>
+                <ul style="color: #F8FAFC; padding-left: 18px; margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
+                    <li><b>Local Community Service:</b> Look into regional food banks, library tutoring programs, or youth mentorship initiatives near your district.</li>
+                    <li><b>School-Based Leadership:</b> Start or step up as an officer in an academic club, cultural club, or student council to demonstrate initiative.</li>
+                    <li><b>Family Responsibilities:</b> If you help care for siblings or work a part-time job, explicitly log this in the UC application activity section—colleges highly value contextual responsibilities.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col_op2:
+            st.markdown(f"""
+            <div class="analysis-box">
+                <h4>📚 Academic & Testing Strategy</h4>
+                <p style="color: #94A3B8; font-size: 0.9rem; margin-top: 10px;">
+                    Tailored path for applicants targeting <b>{selected_campus}</b>:
+                </p>
+                <ul style="color: #F8FAFC; padding-left: 18px; margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
+                    <li><b>UC Test-Free Policy Note:</b> Remember that UCs do not use SAT/ACT scores for admissions or scholarship selection, so focus heavily on your <b>A-G course GPA</b> and rigorous honors/AP/IB classes.</li>
+                    <li><b>Pre-College Enrichment:</b> Check out online or local UC extension programs (like COSMOS or UC-sponsored summer academies) that cater to high schoolers in your area.</li>
+                    <li><b>Personal Insight Questions (PIQs):</b> Leverage your unique school environment and hurdles overcome in your 4 short essay responses.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
