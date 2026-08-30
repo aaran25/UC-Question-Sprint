@@ -221,7 +221,7 @@ else:
     ])
 
     with tab1:
-        st.markdown(f"### 🔍 Telemetry Grid: Socioeconomic Impact vs. Success Rate ({selected_year})")
+        st.markdown(f"### 🔍 Telemetry Grid: Socioeconomic Impact vs. Admission Rate ({selected_year})")
         
         col_fig, col_stat = st.columns([2, 1])
         
@@ -279,7 +279,7 @@ else:
         <div class="analysis-box">
             <h4>📊 Regression Impact Breakdown & Plain-English Translation</h4>
             <p style="color: #94A3B8; margin-bottom: 12px; font-size: 0.9rem;">
-                Mathematical breakdown mapping how high school poverty levels change acceptance outcomes at <b>{selected_campus}</b> ({selected_year}):
+                Mathematical breakdown mapping how high school poverty levels change admission outcomes at <b>{selected_campus}</b> ({selected_year}):
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -303,7 +303,7 @@ else:
             <div style="background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); height: 100%;">
                 <b style="color: #38BDF8; font-size: 0.9rem;">WHAT THIS MEANS FOR JUDGES</b>
                 <p style="color: #94A3B8; font-size: 0.85rem; margin-top: 10px; line-height: 1.5;">
-                    For every <b>10% increase</b> in a school's poverty rate, the acceptance rate shifts by <b>{(slope * 10):.2f}%</b>. The baseline shows what a wealthy school with 0% poverty expects to get, proving a clear structural penalty tied to geography and income.
+                    For every <b>10% increase</b> in a school's poverty rate, the admission rate shifts by <b>{(slope * 10):.2f}%</b>. The baseline shows what a wealthy school with 0% poverty expects to get, proving a clear structural penalty tied to geography and income.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -343,7 +343,7 @@ else:
             st.markdown(f"""
             <div class="analysis-box" style="margin-top: 0px;">
                 <p style="color: #94A3B8; font-size: 0.85rem; line-height: 1.5;">
-                    Geography acts as a core proxy for structural resource allocation. High-concentration poverty school nodes display clustered geographic disparities in acceptance rates.
+                    Geography acts as a core proxy for structural resource allocation. High-concentration poverty school nodes display clustered geographic disparities in admission rates.
                 </p>
                 <p style="color: #38BDF8; font-size: 0.85rem; margin-top: 10px;">
                     <b>Total Nodes Mapped:</b> {len(filtered)}
@@ -363,7 +363,7 @@ else:
                     {opp_gap_ratio}x Multiplier
                 </p>
                 <p style="color: #94A3B8; line-height: 1.6;">
-                    Students attending low-poverty high schools experience an acceptance rate <b>{opp_gap_ratio} times higher</b> than peers at high-poverty institutions for <b>{selected_campus}</b>.
+                    Students attending low-poverty high schools experience an admission rate <b>{opp_gap_ratio} times higher</b> than peers at high-poverty institutions for <b>{selected_campus}</b>.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -385,7 +385,7 @@ else:
         st.markdown("### 📋 Sector Performance Indices")
         col_left, col_right = st.columns(2)
         display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
-        rename_map = {"high_school": "School Name", "frpm_pct_100": "Poverty Rate (%)", "applicants": "Applicants", "admits": "Admits", "admit_rate": "Acceptance Rate (%)"}
+        rename_map = {"high_school": "School Name", "frpm_pct_100": "Poverty Rate (%)", "applicants": "Applicants", "admits": "Admits", "admit_rate": "Admission Rate (%)"}
 
         with col_left:
             st.markdown("**🔴 High Vulnerability Sectors**")
