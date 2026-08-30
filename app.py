@@ -146,10 +146,12 @@ def load_data():
 
 df = load_data()
 
-# 4. Hero Section
+# 4. Hero Section with Large Question Header
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">🌐 Utopian Core: UC Admissions Matrix</div>
+    <div style="font-size: 1.4rem; font-weight: 800; color: #38BDF8; margin-bottom: 8px; line-height: 1.4;">
+        How do high school socioeconomic contexts (specifically poverty concentrations measured by Free or Reduced-Price Meal percentages) correlate with and impact UC admissions access and outcomes across different Bay Area educational sectors?
+    </div>
     <p class="hero-text">
         Advanced telemetry tracking student socioeconomic dynamics, poverty concentrations (FRPM), and institutional access across Bay Area educational sectors.
     </p>
@@ -213,7 +215,7 @@ else:
         "📊 Visual Telemetry", 
         "⚖️ Equity & Opportunity Gap", 
         "📋 Sector Leaderboards", 
-        "🤖 Neural Predictor Matrix",
+        "🤖 Admission Predictor",
         "🎯 Your College Game Plan"
     ])
 
@@ -305,7 +307,7 @@ else:
             st.dataframe(filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].rename(columns=rename_map), hide_index=True, use_container_width=True)
 
     with tab4:
-        st.markdown("### 🤖 Neural Admission Predictor Matrix")
+        st.markdown("### 🤖 Admission Predictor")
         col_pred1, col_pred2 = st.columns(2)
         all_schools = sorted(df["high_school"].dropna().unique()) if "high_school" in df.columns else []
         
