@@ -210,10 +210,9 @@ else:
 
     st.write("")
 
-    # 8. Tabs Configuration
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    # 8. Tabs Configuration (Mapping tab removed)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Visual Telemetry", 
-        "🗺️ Geographic Mapping",
         "⚖️ Equity & Opportunity Gap", 
         "📋 Sector Leaderboards", 
         "📈 Demographic Spectrum", 
@@ -309,49 +308,6 @@ else:
             """, unsafe_allow_html=True)
 
     with tab2:
-        st.markdown(f"### 🗺️ Geographic Spatial Disparity Topology ({selected_year})")
-        st.markdown("Visualizing regional high school nodes across California mapped against socioeconomic poverty thresholds.")
-
-        col_m1, col_m2 = st.columns([3, 1])
-
-        with col_m1:
-            if "latitude" in filtered.columns and "longitude" in filtered.columns:
-                fig_map = px.scatter_mapbox(
-                    filtered,
-                    lat="latitude",
-                    lon="longitude",
-                    color="frpm_pct_100",
-                    size="applicants",
-                    hover_name="high_school",
-                    hover_data=["admit_rate", "frpm_pct_100"],
-                    color_continuous_scale=["#38BDF8", "#0284C7", "#0F172A"],
-                    zoom=7,
-                    height=450
-                )
-                fig_map.update_layout(
-                    mapbox_style="carto-darkmatter",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    margin=dict(t=10, b=10, l=10, r=10),
-                    font=dict(color="#F8FAFC", family="Plus Jakarta Sans")
-                )
-                st.plotly_chart(fig_map, use_container_width=True)
-            else:
-                st.info("💡 Spatial coordinate columns (`latitude`, `longitude`) not detected in active dataset container.")
-
-        with col_m2:
-            st.markdown("##### 📍 Geographic Insight")
-            st.markdown(f"""
-            <div class="analysis-box" style="margin-top: 0px;">
-                <p style="color: #94A3B8; font-size: 0.85rem; line-height: 1.5;">
-                    Geography acts as a core proxy for structural resource allocation. High-concentration poverty school nodes display clustered geographic disparities in admission rates.
-                </p>
-                <p style="color: #38BDF8; font-size: 0.85rem; margin-top: 10px;">
-                    <b>Total Nodes Mapped:</b> {len(filtered)}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-    with tab3:
         st.markdown("### ⚖️ Equity & Opportunity Gap Analysis")
         col_g1, col_g2 = st.columns(2)
         
@@ -381,7 +337,7 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
-    with tab4:
+    with tab3:
         st.markdown("### 📋 Sector Performance Indices")
         col_left, col_right = st.columns(2)
         display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
@@ -395,13 +351,13 @@ else:
             st.markdown("**🟢 Low Vulnerability Sectors**")
             st.dataframe(filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].rename(columns=rename_map), hide_index=True, use_container_width=True)
 
-    with tab5:
+    with tab4:
         st.markdown("### 📊 Distribution Topology Across Sectors")
         fig_hist = px.histogram(filtered, x="frpm_pct_100", nbins=25, labels={"frpm_pct_100": "Poverty Rate (% FRPM)"}, color_discrete_sequence=["#38BDF8"])
         fig_hist.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15, 23, 42, 0.4)", font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12), height=400)
         st.plotly_chart(fig_hist, use_container_width=True)
 
-    with tab6:
+    with tab5:
         st.markdown("### 🤖 Neural Admission Predictor Matrix")
         col_pred1, col_pred2 = st.columns(2)
         all_schools = sorted(df["high_school"].dropna().unique()) if "high_school" in df.columns else []
