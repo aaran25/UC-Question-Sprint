@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 
@@ -10,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. Creamy Aesthetic & High-Contrast Typography Styling
+# 2. Creamy Aesthetic & High-Contrast Tab & Typography Styling
 st.markdown("""
     <style>
     .stApp {
@@ -119,116 +118,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Session state initialization for active tab selection
-if 'active_tab_index' not in st.session_state:
-    st.session_state.active_tab_index = 0
-
-# Interactive Tilting Category Cards Component replacing native tabs
-html_cards = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body {{
-            background-color: transparent;
-            font-family: 'Inter', -apple-system, sans-serif;
-            margin: 0;
-            padding: 5px 0 15px 0;
-        }}
-        .container {{
-            display: flex;
-            gap: 15px;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-        }}
-        .category-card {{
-            background-color: #FFFFFF;
-            border: 2px solid #E8E0D5;
-            padding: 16px 14px;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
-            flex: 1;
-            min-width: 250px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            transition: all 0.2s ease;
-        }}
-        .category-card.active {{
-            background-color: #1A1614;
-            border-color: #1A1614;
-        }}
-        .category-card:hover {{
-            box-shadow: 0 6px 16px rgba(46, 39, 36, 0.08);
-            transform: translateY(-2px);
-        }}
-        .icon-wrapper {{
-            display: inline-block;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }}
-        .icon {{
-            font-size: 1.8rem;
-            display: block;
-        }}
-        .category-text {{
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #1A1614;
-            text-align: left;
-            line-height: 1.3;
-        }}
-        .category-card.active .category-text {{
-            color: #FAF7F2;
-        }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="category-card {'active' if st.session_state.active_tab_index == 0 else ''}" onclick="setTabIndex(0)">
-            <div class="icon-wrapper"><span class="icon">📊</span></div>
-            <div class="category-text">Visual Analysis & Takeaways</div>
-        </div>
-        <div class="category-card {'active' if st.session_state.active_tab_index == 1 else ''}" onclick="setTabIndex(1)">
-            <div class="icon-wrapper"><span class="icon">📋</span></div>
-            <div class="category-text">School Leaderboards</div>
-        </div>
-        <div class="category-card {'active' if st.session_state.active_tab_index == 2 else ''}" onclick="setTabIndex(2)">
-            <div class="icon-wrapper"><span class="icon">📈</span></div>
-            <div class="category-text">Distribution Overview</div>
-        </div>
-    </div>
-    <script>
-        function setTabIndex(index) {{
-            window.parent.postMessage({{ type: 'streamlit:setComponentValue', value: index }}, '*');
-        }}
-
-        const cards = document.querySelectorAll('.category-card');
-        cards.forEach(card => {{
-            const iconWrapper = card.querySelector('.icon-wrapper');
-            card.addEventListener('mousemove', (e) => {{
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const centerX = rect.width / 2;
-                const tiltAngle = ((x - centerX) / centerX) * 15;
-                iconWrapper.style.transform = `rotate(${{tiltAngle}}deg) scale(1.15)`;
-            });
-            card.addEventListener('mouseleave', () => {{
-                iconWrapper.style.transform = 'rotate(0deg) scale(1)';
-            });
-        });
-    </script>
-</body>
-</html>
-"""
-
-clicked_index = components.html(html_cards, height=95)
-if clicked_index is not None and clicked_index != st.session_state.active_tab_index:
-    st.session_state.active_tab_index = clicked_index
-    st.rerun()
-
 # 5. Sidebar Controls (Filtered to exclude years before 2014)
 st.sidebar.header("🎛️ Control Panel")
 st.sidebar.markdown("Customize parameters to segment the dataset.")
@@ -275,10 +164,10 @@ else:
 
     st.write("")
 
-    # 8. Render Content Based on Active Interactive Card Selection
-    current_tab = st.session_state.active_tab_index
+    # 8. Standard Native Streamlit Tabs
+    tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
 
-    if current_tab == 0:
+    with tab1:
         st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
         
         fig = px.scatter(
@@ -339,11 +228,12 @@ else:
         with st.expander("🏛️ Overall Policy Takeaway"):
             st.write("Targeted intervention and holistic application reviews are vital for bridging the gap and ensuring high-poverty Bay Area schools have equal pathways into top-tier public universities.")
 
-    elif current_tab == 1:
+    with tab2:
         st.markdown("### School Performance Breakdowns")
         
         st.markdown("""
-        > **How to read these tables:** > * **School Name:** The high school evaluated.
+        > **How to read these tables:** 
+        > * **School Name:** The high school evaluated.
         > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
         > * **Applicants:** Total number of students who applied to this UC campus from the school.
         > * **Admits:** Total number of students accepted.
@@ -381,7 +271,7 @@ else:
                 low_pov_table["Acceptance Rate (%)"] = low_pov_table["Acceptance Rate (%)"].round(2)
             st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
-    elif current_tab == 2:
+    with tab3:
         st.markdown("### Distribution of Poverty Across Bay Area High Schools")
         fig_hist = px.histogram(
             filtered,
