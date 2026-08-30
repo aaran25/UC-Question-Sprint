@@ -318,26 +318,30 @@ else:
 
     with tab4:
         st.markdown("### 🤖 Advanced Machine Learning Admission Predictor")
-        st.markdown("Type to search or select your high school name from the dataset, pick your target UC campus, major, and economic details to calculate your predictive admission percentage.")
+        st.markdown("Configure applicant parameters below to simulate admission predictions based on historical institutional data.")
 
         col_pred1, col_pred2 = st.columns(2)
         
         all_schools = sorted(df["school_name"].dropna().unique()) if "school_name" in df.columns else []
         
         with col_pred1:
-            # Native Streamlit selectbox with built-in type-to-search functionality
+            st.markdown("##### 🏫 High School Selection")
             selected_school_pred = st.selectbox(
-                "Select or Type High School Name:", 
+                "Search and select high school name:", 
                 options=all_schools,
                 index=0 if all_schools else None,
                 placeholder="Type to search high school..."
             )
             
-            target_uc_college = st.selectbox("Target UC College to Apply To:", campuses)
-            input_major = st.selectbox("Intended Major Field", ["STEM / Engineering", "Computer Science", "Biological Sciences", "Social Sciences", "Humanities / Arts", "Business / Economics"])
+            st.markdown("##### 🏛️ Target UC College")
+            target_uc_college = st.selectbox("Select UC campus you are applying to:", campuses, label_visibility="collapsed")
+            
+            st.markdown("##### 📚 Intended Major Field")
+            input_major = st.selectbox("Select your major field of study:", ["STEM / Engineering", "Computer Science", "Biological Sciences", "Social Sciences", "Humanities / Arts", "Business / Economics"], label_visibility="collapsed")
 
         with col_pred2:
-            input_income = st.number_input("Estimated Household Income ($)", min_value=10000, max_value=500000, value=85000, step=5000)
+            st.markdown("##### 💰 Estimated Household Income")
+            input_income = st.number_input("Enter annual household income ($):", min_value=10000, max_value=500000, value=85000, step=5000, format="$%d", label_visibility="collapsed")
             
             # Safe match lookup with error handling
             school_match_row = df[df["school_name"] == selected_school_pred] if selected_school_pred else pd.DataFrame()
@@ -352,8 +356,11 @@ else:
             else:
                 default_app_vol = 50
 
-            input_frpm = st.slider("High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=default_frpm, step=1.0)
-            input_applicants = st.number_input("Cohort Applicant Volume", min_value=1, max_value=500, value=default_app_vol)
+            st.markdown("##### 📊 High School Poverty Rate (% FRPM)")
+            input_frpm = st.slider("Adjust high school poverty rate:", min_value=0.0, max_value=100.0, value=default_frpm, step=1.0, label_visibility="collapsed")
+            
+            st.markdown("##### 👥 Cohort Applicant Volume")
+            input_applicants = st.number_input("Enter total applicants from your school:", min_value=1, max_value=500, value=default_app_vol, label_visibility="collapsed")
 
         major_weights = {
             "Computer Science": 0.6,
