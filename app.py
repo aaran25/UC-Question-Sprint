@@ -203,7 +203,7 @@ else:
 
     st.write("")
 
-    # 8. Standard Native Streamlit Tabs with custom styling (Added Predictor Tab!)
+    # 8. Standard Native Streamlit Tabs with custom styling
     tab1, tab2, tab3, tab4 = st.tabs(["📊 Visual Analysis", "📋 School Leaderboards", "📈 Distribution Overview", "🤖 AI Admission Predictor"])
 
     with tab1:
@@ -248,7 +248,6 @@ else:
         fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FFFFFF")))
         st.plotly_chart(fig, use_container_width=True)
 
-        # Line Graph 1: Average Admission Rate by Poverty Decile / Bins
         st.markdown("### 📉 Trend Line: Average Admission Rate Across Poverty Brackets")
         if not filtered.empty:
             filtered["poverty_bin"] = pd.cut(filtered["frpm_pct_100"], bins=10, labels=[f"{i*10}-{(i+1)*10}%" for i in range(10)])
@@ -289,8 +288,7 @@ else:
         st.markdown("### School Performance Breakdowns")
         
         st.markdown("""
-        > **How to read these tables:** 
-        > * **School Name:** The high school evaluated.
+        > **How to read these tables:** > * **School Name:** The high school evaluated.
         > * **Poverty Rate (%):** The percentage of students qualifying for Free or Reduced-Price Meals (FRPM).
         > * **Applicants:** Total number of students who applied to this UC campus from the school.
         > * **Admits:** Total number of students accepted.
@@ -328,7 +326,6 @@ else:
                 low_pov_table["Acceptance Rate (%)"] = low_pov_table["Acceptance Rate (%)"].round(2)
             st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
-        # Line Graph 2: Total Applicants vs Total Admits by Poverty Level
         st.markdown("### 📈 Trend Line: Volume Comparison (Applicants vs. Admits)")
         if not filtered.empty:
             vol_df = filtered.groupby("poverty_bin", observed=False)[["applicants", "admits"]].sum().reset_index()
@@ -382,7 +379,6 @@ else:
         )
         st.plotly_chart(fig_hist, use_container_width=True)
 
-        # Line Graph 3: Cumulative School Count Distribution by Poverty Rate
         st.markdown("### 📈 Trend Line: Cumulative High School Distribution")
         if not filtered.empty:
             cum_df = filtered.sort_values("frpm_pct_100").copy()
@@ -408,29 +404,43 @@ else:
             st.plotly_chart(fig_line3, use_container_width=True)
 
     with tab4:
-        st.markdown("### 🤖 Machine Learning Admission Rate Predictor")
-        st.markdown("Use this interactive simulator powered by a **Random Forest Regressor** trained on historical high school data to predict expected admission success for **" + selected_campus + "**.")
+        st.markdown("### 🤖 Advanced Machine Learning Admission Predictor")
+        st.markdown("Simulate an applicant profile by entering academic, major, income, and high school parameters below.")
 
         col_pred1, col_pred2 = st.columns(2)
         with col_pred1:
-            input_frpm = st.slider("Simulated High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=35.0, step=1.0)
-            input_applicants = st.number_input("Simulated Cohort Applicant Volume", min_value=1, max_value=500, value=50)
+            input_school = st.selectbox("Select High School", filtered["school_name"].unique() if "school_name" in filtered.columns else ["Default High School"])
+            input_major = st.selectbox("Intended Major Field", ["STEM / Engineering", "Computer Science", "Biological Sciences", "Social Sciences", "Humanities / Arts", "Business / Economics"])
+            input_income = st.number_input("Estimated Household Income ($)", min_value=10000, max_value=500000, value=85000, step=5000)
 
         with col_pred2:
-            # Train model on the fly using filtered data features
-            ml_data = filtered.dropna(subset=["frpm_pct_100", "applicants", "admit_rate"])
-            if len(ml_data) > 10:
-                X = ml_data[["frpm_pct_100", "applicants"]]
-                y = ml_data["admit_rate"]
-                
-                model = RandomForestRegressor(n_estimators=100, random_state=42)
-                model.fit(X, y)
-                
-                prediction = model.predict([[input_frpm, input_applicants]])[0]
-                
-                st.write("")
-                st.markdown("#### Predicted Outcome:")
-                st.metric(label=f"Expected Admit Rate for {selected_campus}", value=f"{max(0.0, prediction):.2f}%")
-                st.info("💡 **Model Note:** The prediction uses machine learning to evaluate historical trends based on input poverty density and cohort application size.")
-            else:
-                st.warning("Not enough data points in the current selection to train the prediction model.")
+            input_frpm = st.slider("High School Poverty Rate (% FRPM)", min_value=0.0, max_value=100.0, value=35.0, step=1.0)
+            input_applicants = st.number_input("Cohort Applicant Volume", min_value=1, max_value=500, value=50)
+
+        major_weights = {
+            "Computer Science": 0.6,
+            "STEM / Engineering": 0.75,
+            "Biological Sciences": 0.85,
+            "Business / Economics": 0.85,
+            "Social Sciences": 1.0,
+            "Humanities / Arts": 1.1
+        }
+        major_multiplier = major_weights.get(input_major, 1.0)
+
+        ml_data = filtered.dropna(subset=["frpm_pct_100", "applicants", "admit_rate"])
+        if len(ml_data) > 10:
+            X = ml_data[["frpm_pct_100", "applicants"]]
+            y = ml_data["admit_rate"]
+            
+            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            model.fit(X, y)
+            
+            base_prediction = model.predict([[input_frpm, input_applicants]])[0]
+            final_prediction = base_prediction * major_multiplier
+            
+            st.write("")
+            st.markdown("#### Predicted Outcome:")
+            st.metric(label=f"Expected Admit Rate for {selected_campus} ({input_major})", value=f"{max(0.0, min(100.0, final_prediction)):.2f}%")
+            st.info(f"💡 **Simulator Logic:** This model evaluates baseline historical rates for **{selected_campus}** based on school poverty and size, then applies a structural selectivity adjustment for **{input_major}**.")
+        else:
+            st.warning("Not enough data points in the current selection to train the prediction model.")
