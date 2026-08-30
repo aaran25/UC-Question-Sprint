@@ -148,21 +148,20 @@ df = load_data()
 # 4. Hero Section
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-title">How does student poverty concentration (FRPM) impact UC admission outcomes across Bay Area high schools?</div>
+    <div class="hero-title">🎓 UC Admissions & Socioeconomics Dashboard</div>
     <p class="hero-text">
-        This interactive dashboard evaluates structural educational disparities by analyzing how high school socioeconomic status 
-        (measured by Free or Reduced-Price Meal eligibility) correlates with University of California acceptance rates, applicant volume, and overall institutional access.
+        Explore how student poverty concentration (FRPM) impacts University of California admission outcomes across Bay Area high schools with clean analytics and predictive modeling.
     </p>
 </div>
 """, unsafe_allow_html=True)
 
 # 5. Sidebar Controls
 st.sidebar.header("🎛️ Control Panel")
-st.sidebar.markdown("Customize parameters to segment the dataset.")
+st.sidebar.markdown("Customize global parameters.")
 
 campuses = sorted(df["campus"].dropna().unique()) if "campus" in df.columns else ["Universitywide"]
 default_campus_idx = campuses.index("Universitywide") if "Universitywide" in campuses else 0
-selected_campus = st.sidebar.selectbox("Select UC Campus", campuses, index=default_campus_idx)
+selected_campus = st.sidebar.selectbox("🏛️ Select UC Campus", campuses, index=default_campus_idx)
 
 if "fall_term" in df.columns:
     all_years = sorted(df["fall_term"].dropna().unique(), reverse=True)
@@ -170,9 +169,10 @@ if "fall_term" in df.columns:
 else:
     years = [2025]
 
-selected_year = st.sidebar.selectbox("Select Fall Term", years, index=0)
+selected_year = st.sidebar.selectbox("📅 Select Fall Term", years, index=0)
 
-poverty_threshold = st.sidebar.slider("High Poverty Threshold (% FRPM)", min_value=10, max_value=90, value=50, step=5)
+# Fixed default threshold since slider is removed from sidebar
+poverty_threshold = 50.0
 
 # 6. Data Filtering & Empty Check
 filtered = df[
@@ -195,10 +195,10 @@ else:
 
     # 7. Metrics Row
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Campus", selected_campus)
-    col2.metric(f"High Pov Rate (≥{poverty_threshold}%)", f"{high_rate:.2f}%")
-    col3.metric(f"Low Pov Rate (<{poverty_threshold}%)", f"{low_rate:.2f}%")
-    col4.metric("Admit Rate Gap", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
+    col1.metric("🏛️ Active Campus", selected_campus)
+    col2.metric(f"📈 High Pov Rate (≥50%)", f"{high_rate:.2f}%")
+    col3.metric(f"📉 Low Pov Rate (<50%)", f"{low_rate:.2f}%")
+    col4.metric("⚖️ Admit Rate Gap", f"{rate_diff:+.2f}%", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
 
     st.write("")
 
@@ -206,7 +206,7 @@ else:
     tab1, tab2, tab3, tab4 = st.tabs(["📊 Visual Analysis", "📋 School Leaderboards", "📈 Distribution Overview", "🤖 AI Admission Predictor"])
 
     with tab1:
-        st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
+        st.markdown(f"### 🔍 Correlation: Poverty vs. Admission Rate ({selected_year})")
         
         fig = px.scatter(
             filtered,
@@ -273,7 +273,7 @@ else:
             st.plotly_chart(fig_line1, use_container_width=True)
 
     with tab2:
-        st.markdown("### School Performance Breakdowns")
+        st.markdown("### 📋 School Performance Breakdowns")
         col_left, col_right = st.columns(2)
 
         display_cols = [col for col in ["high_school", "frpm_pct_100", "applicants", "admits", "admit_rate"] if col in filtered.columns]
@@ -286,19 +286,19 @@ else:
         }
 
         with col_left:
-            st.markdown("**Highest Poverty High Schools**")
+            st.markdown("**🔴 Highest Poverty High Schools**")
             top_pov = filtered.sort_values(by="frpm_pct_100", ascending=False).head(10)[display_cols].copy()
             top_pov = top_pov.rename(columns=rename_map)
             st.dataframe(top_pov, hide_index=True, use_container_width=True)
 
         with col_right:
-            st.markdown("**Lowest Poverty High Schools**")
+            st.markdown("**🟢 Lowest Poverty High Schools**")
             low_pov_table = filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].copy()
             low_pov_table = low_pov_table.rename(columns=rename_map)
             st.dataframe(low_pov_table, hide_index=True, use_container_width=True)
 
     with tab3:
-        st.markdown("### Distribution of Poverty Across Bay Area High Schools")
+        st.markdown("### 📊 Distribution of Poverty Across Bay Area High Schools")
         fig_hist = px.histogram(
             filtered,
             x="frpm_pct_100",
@@ -322,7 +322,6 @@ else:
 
         col_pred1, col_pred2 = st.columns(2)
         
-        # Explicitly pull high schools from the 'high_school' column
         all_schools = sorted(df["high_school"].dropna().unique()) if "high_school" in df.columns else []
         
         with col_pred1:
@@ -344,7 +343,6 @@ else:
             st.markdown("##### 💰 Estimated Household Income")
             input_income = st.number_input("Enter annual household income ($):", min_value=10000, max_value=500000, value=85000, step=5000, label_visibility="collapsed")
             
-            # Safe match lookup using 'high_school' column
             school_match_row = df[df["high_school"] == selected_school_pred] if selected_school_pred else pd.DataFrame()
             
             if not school_match_row.empty and "frpm_pct_100" in school_match_row.columns:
@@ -357,9 +355,9 @@ else:
             else:
                 default_app_vol = 50
 
-            st.markdown("##### 📊 High School Poverty Rate (% FRPM)")
-            input_frpm = st.slider("Adjust high school poverty rate:", min_value=0.0, max_value=100.0, value=default_frpm, step=1.0, label_visibility="collapsed")
-            
+            # Slider removed completely as requested; utilizing default_frpm directly fetched from dataset context
+            input_frpm = default_frpm
+
             st.markdown("##### 👥 Cohort Applicant Volume")
             input_applicants = st.number_input("Enter total applicants from your school:", min_value=1, max_value=500, value=default_app_vol, label_visibility="collapsed")
 
@@ -388,6 +386,6 @@ else:
             st.write("")
             st.markdown("#### Predicted Outcome:")
             st.metric(label=f"Expected Admit Rate for {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_prediction)):.2f}%")
-            st.info(f"💡 **Simulator Logic:** Evaluates historical trends for **{target_uc_college}** given **{selected_school_pred}'s** poverty profile, adjusted for the competitiveness of **{input_major}**.")
+            st.info(f"💡 **Simulator Logic:** Evaluates historical trends for **{target_uc_college}** given **{selected_school_pred}'s** dataset-derived poverty profile ({input_frpm:.1f}%), adjusted for the competitiveness of **{input_major}**.")
         else:
             st.warning(f"Not enough data points available for **{target_uc_college}** to run the model.")
