@@ -204,12 +204,11 @@ else:
 
     st.write("")
 
-    # 8. Tabs Configuration
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    # 8. Tabs Configuration (Demographic Spectrum removed)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Visual Telemetry", 
         "⚖️ Equity & Opportunity Gap", 
         "📋 Sector Leaderboards", 
-        "📈 Demographic Spectrum", 
         "🤖 Neural Predictor Matrix",
         "🎯 Your College Game Plan"
     ])
@@ -321,12 +320,6 @@ else:
             st.dataframe(filtered.sort_values(by="frpm_pct_100", ascending=True).head(10)[display_cols].rename(columns=rename_map), hide_index=True, use_container_width=True)
 
     with tab4:
-        st.markdown("### 📊 Demographic Spectrum")
-        fig_demo = px.histogram(filtered, x="frpm_pct_100", nbins=20, color_discrete_sequence=["#0284C7"])
-        fig_demo.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(15, 23, 42, 0.4)", font=dict(color="#F8FAFC", family="Plus Jakarta Sans", size=12), height=400)
-        st.plotly_chart(fig_demo, use_container_width=True)
-
-    with tab5:
         st.markdown("### 🤖 Neural Admission Predictor Matrix")
         col_pred1, col_pred2 = st.columns(2)
         all_schools = sorted(df["high_school"].dropna().unique()) if "high_school" in df.columns else []
@@ -354,7 +347,7 @@ else:
             st.write("")
             st.metric(label=f"Predicted Acceptance Probability — {target_uc_college} ({input_major})", value=f"{max(0.0, min(100.0, final_pred)):.2f}%")
 
-    with tab6:
+    with tab5:
         st.markdown("### 🚀 Your Personal Game Plan to Crush College Admissions!")
         st.markdown("Hey! College admissions can feel overwhelming, but you've got this. Because universities like **" + str(selected_campus) + "** look at your achievements **in context** of your high school environment, your hard work shines even brighter. Here is an actionable roadmap to level up your profile:")
         
