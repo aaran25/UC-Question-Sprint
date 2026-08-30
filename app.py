@@ -74,6 +74,35 @@ st.markdown("""
         margin: 0;
     }
 
+    /* Style Streamlit Tabs for Black Text and Rounded Hover/Active State */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: transparent;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 48px;
+        background-color: #FFFFFF;
+        border-radius: 12px 12px 0 0;
+        border: 1px solid #E8E0D5;
+        border-bottom: none;
+        padding: 0 20px;
+        color: #1A1614 !important;
+        font-weight: 700;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #F2ECE4 !important;
+        color: #1A1614 !important;
+        border-radius: 12px !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: #1A1614 !important;
+        color: #FAF7F2 !important;
+        border-radius: 12px !important;
+    }
+
     /* Rounded Styling for Expander Dropdowns */
     div[data-testid="stExpander"] {
         background-color: #FFFFFF;
@@ -164,7 +193,7 @@ else:
 
     st.write("")
 
-    # 8. Standard Native Streamlit Tabs
+    # 8. Standard Native Streamlit Tabs with custom CSS styling for text and rounded hover states
     tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
 
     with tab1:
