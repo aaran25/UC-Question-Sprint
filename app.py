@@ -184,9 +184,9 @@ st.write("")
 tab1, tab2, tab3 = st.tabs(["📊 Visual Analysis & Takeaways", "📋 School Leaderboards", "📈 Distribution Overview"])
 
 with tab1:
-    st.markdown(f"### Correlation 1: Poverty vs. Admission Rate ({selected_year})")
+    st.markdown(f"### Correlation: Poverty vs. Admission Rate ({selected_year})")
     
-    fig1 = px.scatter(
+    fig = px.scatter(
         filtered,
         x="frpm_pct_100",
         y="admit_rate",
@@ -204,46 +204,34 @@ with tab1:
         trendline_color_override="#1A1614"
     )
 
-    fig1.update_layout(
+    fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#F2ECE4",
         font=dict(color="#1A1614", family="Inter", size=12),
         coloraxis_showscale=False,
-        height=480,
+        height=520,
         margin=dict(t=20, b=20, l=20, r=20),
-        xaxis=dict(showgrid=True, gridcolor="#E5DCD3", zeroline=True, zerolinewidth=1.5, zerolinecolor="#1A1614", title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"), tickfont=dict(size=12, color="#000000", family="Inter")),
-        yaxis=dict(showgrid=True, gridcolor="#E5DCD3", zeroline=True, zerolinewidth=1.5, zerolinecolor="#1A1614", title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"), tickfont=dict(size=12, color="#000000", family="Inter"))
+        xaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
+        ),
+        yaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
+        )
     )
-    fig1.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
-    st.plotly_chart(fig1, use_container_width=True)
-
-    # Added secondary analysis visual comparing Applicant Volume vs Poverty Concentration
-    st.markdown(f"### Correlation 2: Applicant Pipeline Volume vs. Poverty Rate")
-    fig2 = px.scatter(
-        filtered,
-        x="frpm_pct_100",
-        y="applicants",
-        color="admit_rate",
-        color_continuous_scale=["#C8B89A", "#2C221E"],
-        hover_name="school_name" if "school_name" in filtered.columns else None,
-        labels={
-            "frpm_pct_100": "High School Poverty Rate (% FRPM)",
-            "applicants": "Total Applicant Volume",
-            "admit_rate": "Admit Rate (%)"
-        },
-        trendline="ols",
-        trendline_color_override="#8C6D53"
-    )
-    fig2.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="#F2ECE4",
-        font=dict(color="#1A1614", family="Inter", size=12),
-        height=450,
-        margin=dict(t=20, b=20, l=20, r=20),
-        xaxis=dict(showgrid=True, gridcolor="#E5DCD3", zeroline=True, zerolinewidth=1.5, zerolinecolor="#1A1614", title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"), tickfont=dict(size=12, color="#000000", family="Inter")),
-        yaxis=dict(showgrid=True, gridcolor="#E5DCD3", zeroline=True, zerolinewidth=1.5, zerolinecolor="#1A1614", title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"), tickfont=dict(size=12, color="#000000", family="Inter"))
-    )
-    st.plotly_chart(fig2, use_container_width=True)
+    fig.update_traces(marker=dict(opacity=0.85, line=dict(width=1, color="#FAF7F2")))
+    st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("### 💡 Deep-Dive Insights (Click to expand)")
     
@@ -294,7 +282,23 @@ with tab3:
         plot_bgcolor="#F2ECE4",
         font=dict(color="#1A1614", family="Inter", size=12),
         height=400,
-        xaxis=dict(showgrid=True, gridcolor="#E5DCD3", zeroline=True, zerolinewidth=1.5, zerolinecolor="#1A1614", title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"), tickfont=dict(size=12, color="#000000", family="Inter")),
-        yaxis=dict(showgrid=True, gridcolor="#E5DCD3", zeroline=True, zerolinewidth=1.5, zerolinecolor="#1A1614", title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"), tickfont=dict(size=12, color="#000000", family="Inter"))
+        xaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
+        ),
+        yaxis=dict(
+            showgrid=True, 
+            gridcolor="#E5DCD3",
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor="#1A1614",
+            title_font=dict(size=14, color="#1A1614", family="Inter", weight="bold"),
+            tickfont=dict(size=12, color="#000000", family="Inter")
+        )
     )
     st.plotly_chart(fig_hist, use_container_width=True)
