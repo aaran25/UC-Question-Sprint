@@ -143,7 +143,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Interactive Tilting Category Cards Component
+# Interactive Tilting Category Cards Component matching your 3 specific tabs
 html_cards = """
 <!DOCTYPE html>
 <html lang="en">
@@ -159,71 +159,79 @@ html_cards = """
         .container {
             display: flex;
             gap: 20px;
-            justify-content: center;
+            justify-content: flex-start;
+            flex-wrap: wrap;
         }
         .category-card {
             background-color: #FFFFFF;
             border: 1px solid #E8E0D5;
-            padding: 15px 10px;
+            padding: 18px 16px;
             border-radius: 14px;
             text-align: center;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(46, 39, 36, 0.03);
-            width: 140px;
+            width: 260px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .category-card:hover {
             box-shadow: 0 6px 16px rgba(46, 39, 36, 0.08);
             transform: translateY(-2px);
         }
-        .icon {
-            font-size: 2.2rem;
+        .icon-wrapper {
             display: inline-block;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .icon {
+            font-size: 2rem;
+            display: block;
+        }
         .category-text {
-            margin-top: 8px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: #1A1614;
+            text-align: left;
+            line-height: 1.3;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="category-card" onclick="alert('Category 1: Overview & Scatter Analysis selected!')">
-            <div class="icon">🏠</div>
-            <div class="category-text">Overview</div>
+        <div class="category-card" onclick="alert('Visual Analysis & Takeaways selected!')">
+            <div class="icon-wrapper"><span class="icon">📊</span></div>
+            <div class="category-text">Visual Analysis & Takeaways</div>
         </div>
-        <div class="category-card" onclick="alert('Category 2: School Leaderboards selected!')">
-            <div class="icon">📊</div>
-            <div class="category-text">Leaderboards</div>
+        <div class="category-card" onclick="alert('School Leaderboards selected!')">
+            <div class="icon-wrapper"><span class="icon">📋</span></div>
+            <div class="category-text">School Leaderboards</div>
         </div>
-        <div class="category-card" onclick="alert('Category 3: Distribution & Insights selected!')">
-            <div class="icon">💡</div>
-            <div class="category-text">Insights</div>
+        <div class="category-card" onclick="alert('Distribution Overview selected!')">
+            <div class="icon-wrapper"><span class="icon">📈</span></div>
+            <div class="category-text">Distribution Overview</div>
         </div>
     </div>
     <script>
         const cards = document.querySelectorAll('.category-card');
         cards.forEach(card => {
-            const icon = card.querySelector('.icon');
+            const iconWrapper = card.querySelector('.icon-wrapper');
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const centerX = rect.width / 2;
                 const tiltAngle = ((x - centerX) / centerX) * 15;
-                icon.style.transform = `rotate(${tiltAngle}deg) scale(1.15)`;
+                iconWrapper.style.transform = `rotate(${tiltAngle}deg) scale(1.15)`;
             });
             card.addEventListener('mouseleave', () => {
-                icon.style.transform = 'rotate(0deg) scale(1)';
+                iconWrapper.style.transform = 'rotate(0deg) scale(1)';
             });
         });
     </script>
 </body>
 </html>
 """
-components.html(html_cards, height=140)
+components.html(html_cards, height=100)
 
 # 5. Sidebar Controls (Filtered to exclude years before 2014)
 st.sidebar.header("🎛️ Control Panel")
