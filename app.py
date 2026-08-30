@@ -192,6 +192,10 @@ else:
     rate_diff = round(low_rate - high_rate, 2)
     opp_gap_ratio = round(low_rate / high_rate, 2) if high_rate > 0 else 0.00
 
+    mean_admit_rate = filtered["admit_rate"].mean()
+    resilient_schools = filtered[(filtered["frpm_pct_100"] >= 50.0) & (filtered["admit_rate"] > mean_admit_rate)]
+    resilient_count = len(resilient_schools)
+
     valid_corr = filtered.dropna(subset=["frpm_pct_100", "admit_rate"])
     r_val, p_val = stats.pearsonr(valid_corr["frpm_pct_100"], valid_corr["admit_rate"]) if len(valid_corr) > 5 else (0.0, 1.0)
 
@@ -200,7 +204,7 @@ else:
     col1.metric("🏛️ Active Node", selected_campus)
     col2.metric("📈 High Pov Yield (≥50%)", f"{high_rate:.2f}%")
     col3.metric("📉 Low Pov Yield (<50%)", f"{low_rate:.2f}%")
-    col4.metric("⚖️ Opportunity Gap Ratio", f"{opp_gap_ratio}x", delta=f"{rate_diff:+.2f}% Gap", delta_color="normal" if rate_diff > 0 else "inverse")
+    col4.metric("⚡ Resilience Outliers", f"{resilient_count} Schools")
 
     st.write("")
 
@@ -216,7 +220,6 @@ else:
     with tab1:
         st.markdown(f"### 🔍 Telemetry Grid: Socioeconomic Impact vs. Admission Rate ({selected_year})")
         
-        # Full width scatter plot without side stats column
         fig = px.scatter(
             filtered,
             x="frpm_pct_100",
@@ -283,9 +286,9 @@ else:
         with col_g2:
             st.markdown(f"""
             <div class="analysis-box" style="height: 100%;">
-                <h4>🌐 Institutional Disparity Delta</h4>
-                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">{abs(rate_diff):.2f}% Gap</p>
-                <p style="color: #94A3B8; line-height: 1.6;">Absolute percentage point variance separating low-need vs high-need high school applicant cohorts.</p>
+                <h4>⚡ Socioeconomic Efficiency Paradox (Resilience Outliers)</h4>
+                <p style="font-size: 2.2rem; font-weight: 900; color: #38BDF8; margin: 15px 0;">{resilient_count} Schools</p>
+                <p style="color: #94A3B8; line-height: 1.6;">High-poverty high schools (≥50% FRPM) successfully punching above their weight class with admission rates exceeding the overall institutional mean ({mean_admit_rate:.2f}%).</p>
             </div>
             """, unsafe_allow_html=True)
 
