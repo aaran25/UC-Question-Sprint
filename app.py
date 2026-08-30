@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="UC Admissions Dashboard", layout="wide")
+st.set_page_config(page_title="UC Poverty & Admissions Dashboard", layout="wide")
 
-st.title("🎓 UC Admissions Explorer (2021–2025)")
-st.markdown("Analyzing applicant outcomes across California public high schools.")
+st.title("📊 Socioeconomic Poverty & UC Admission Rates")
+st.markdown("Analyzing UC admission outcomes across Bay Area high schools based on poverty levels (`frpm_pct`).")
 
 @st.cache_data
 def load_data():
@@ -14,48 +14,37 @@ def load_data():
 
 df = load_data()
 
-# Sidebar Filters
-st.sidebar.header("Filter Options")
-selected_campuses = st.sidebar.multiselect(
-    "Select Campuses", 
-    options=df["campus"].dropna().unique(),
-    default=["UCB", "UCLA"] if "UCB" in df["campus"].values else [df["campus"].iloc[0]]
-)
+# Sidebar controls
+st.sidebar.header("Filter Settings")
+selected_year = st.sidebar.selectbox("Select Fall Term", sorted(df["fall_term"].unique(), reverse=True), index=0)
+poverty_threshold = st.sidebar.slider("High Poverty Threshold (% FRPM)", min_value=30, max_value=70, value=50)
 
-year_range = st.sidebar.slider(
-    "Select Year Range",
-    min_value=int(df["fall_term"].min()),
-    max_value=int(df["fall_term"].max()),
-    value=(2021, 2025)
-)
+# Filter dataset
+filtered = df[(df["fall_term"] == selected_year) & (df["campus"] == "Universitywide")].dropna(subset=["frpm_pct", "admits", "applicants"])
+filtered["admit_rate"] = (filtered["admits"] / filtered["applicants"]) * 100
 
-# Apply Filters
-filtered_df = df[
-    (df["campus"].isin(selected_campuses)) &
-    (df["fall_term"].between(year_range[0], year_range[1]))
-]
+# Group high vs low poverty
+high_pov = filtered[filtered["frpm_pct"] >= poverty_threshold]
+low_pov = filtered[filtered["frpm_pct"] < poverty_threshold]
 
-# Key Performance Indicators (KPIs)
+high_rate = (high_pov["admits"].sum() / high_pov["applicants"].sum() * 100) if not high_pov.empty else 0
+low_rate = (low_pov["admits"].sum() / low_pov["applicants"].sum() * 100) if not low_pov.empty else 0
+
+# Render Key Metrics
 col1, col2, col3 = st.columns(3)
-total_apps = filtered_df["applicants"].sum()
-total_admits = filtered_df["admits"].sum()
-overall_rate = (total_admits / total_apps * 100) if total_apps > 0 else 0
+col1.metric("Selected Year", selected_year)
+col2.metric(f"High Poverty Rate (≥{poverty_threshold}%)", f"{high_rate:.2f}%")
+col3.metric(f"Low Poverty Rate (<{poverty_threshold}%)", f"{low_rate:.2f}%")
 
-col1.metric("Total Applicants", f"{total_apps:,.0f}")
-col2.metric("Total Admits", f"{total_admits:,.0f}")
-col3.metric("Overall Admit Rate", f"{overall_rate:.2f}%")
-
-# Plot: Trend over time
-st.subheader("Admit Rate Trends Over Time")
-trend_df = filtered_df.groupby(["fall_term", "campus"])[["admits", "applicants"]].sum().reset_index()
-trend_df["admit_rate"] = (trend_df["admits"] / trend_df["applicants"]) * 100
-
-fig = px.line(
-    trend_df, 
-    x="fall_term", 
+# Plot: Scatter Plot of Poverty Rate vs Admit Rate
+st.subheader("High School Poverty Rate vs. UC Admission Rate")
+fig = px.scatter(
+    filtered, 
+    x="frpm_pct", 
     y="admit_rate", 
-    color="campus",
-    markers=True,
-    labels={"fall_term": "Fall Term", "admit_rate": "Admit Rate (%)"}
+    size="applicants",
+    hover_name="high_school",
+    labels={"frpm_pct": "Poverty Rate (% FRPM)", "admit_rate": "UC Admit Rate (%)"},
+    trendline="ols"
 )
 st.plotly_chart(fig, use_container_width=True)
